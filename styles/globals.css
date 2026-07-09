@@ -923,6 +923,27 @@ input {
   background: #f7faf8;
 }
 
+.admin-logout-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  margin-top: 8px;
+  padding: 0 10px;
+  border: 1px solid #dfe5ec;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #52605c;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.admin-logout-button:hover {
+  border-color: #cfd8df;
+  color: #9d3527;
+}
+
 .admin-content {
   display: grid;
   align-content: start;

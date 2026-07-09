@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   ClipboardList,
   Database,
+  LogOut,
   LockKeyhole,
   MessageSquareText,
   MousePointerClick,
@@ -216,18 +217,6 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
   const session = getTemporaryAdminSession();
 
   useEffect(() => {
-    function clearSessionOnAdminExit(nextUrl: string) {
-      if (nextUrl.startsWith("/admin")) return;
-      navigator.sendBeacon?.("/api/admin/logout", new Blob(["{}"], { type: "application/json" }));
-    }
-
-    router.events.on("routeChangeStart", clearSessionOnAdminExit);
-    return () => {
-      router.events.off("routeChangeStart", clearSessionOnAdminExit);
-    };
-  }, [router.events]);
-
-  useEffect(() => {
     let mounted = true;
 
     async function refreshData() {
@@ -312,6 +301,16 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
     persistRecord("bug", id, undefined, adminMemo);
   }
 
+  async function logout() {
+    await fetch("/api/admin/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+    router.replace("/admin");
+  }
+
   function addVersionNote(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!versionDraft.trim()) return;
@@ -370,6 +369,10 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
           <div className="admin-session">
             <span>{session.displayName}</span>
             <strong>{session.role}</strong>
+            <button className="admin-logout-button" onClick={logout} type="button">
+              <LogOut size={15} aria-hidden="true" />
+              로그아웃
+            </button>
           </div>
         </aside>
 

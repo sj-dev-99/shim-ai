@@ -7,13 +7,15 @@ SHIM AI는 감정 인식, 자기이해, 회복 습관을 돕는 AI 기반 베타
 ## 주요 기능
 
 - 서비스 허브 메인 페이지: `/`
-- SHIM Test 소개 페이지: `/mind`
+- SHIM Test 목록 페이지: `/shim-test`
+- 준비중 서비스 페이지: `/talk`, `/diary`, `/report`, `/care`
+- AI 감정·회복 유형 테스트 소개 페이지: `/mind`
 - AI 감정·회복 유형 테스트: `/test`
 - 점수 기반 4가지 결과 유형: `/result`
 - 라이트/다크 모드
 - 모바일 우선 반응형 UI
 - 베타 테스트 도구: 피드백 보내기, 오류 신고
-- 버전 표시: `Beta v0.1.1`
+- 버전 표시: `Beta v0.1.2`
 - 방문자/페이지뷰 이벤트 로그 API
 - AI 답변 만족도
 - 테스트 종료 후 의견 작성
@@ -41,7 +43,7 @@ npm run build
 실제 환경변수 파일은 GitHub에 올리지 않습니다. 로컬에서는 `.env.example`을 참고해 `.env.local`을 만들고, 배포 환경에서는 Vercel Project Settings의 Environment Variables에 등록합니다.
 
 ```bash
-NEXT_PUBLIC_BETA_VERSION="Beta v0.1.1"
+NEXT_PUBLIC_BETA_VERSION="Beta v0.1.2"
 BETA_EVENT_WEBHOOK_URL=""
 BETA_EVENT_WEBHOOK_TOKEN=""
 ADMIN_PASSWORD=""

@@ -11,32 +11,42 @@ import {
   Sparkles,
   Sun
 } from "lucide-react";
-import { disclaimer, TEST_CATEGORY, TEST_NAME } from "../lib/data";
+import { disclaimer } from "../lib/data";
 
 type HomePageProps = {
   theme: "light" | "dark";
   toggleTheme: () => void;
 };
 
-const upcomingServices = [
+const services = [
+  {
+    name: "SHIM Test",
+    description: "심리테스트",
+    href: "/shim-test",
+    icon: BrainCircuit
+  },
   {
     name: "SHIM Talk",
     description: "AI 감정 대화",
+    href: "/talk",
     icon: MessageCircleHeart
   },
   {
     name: "SHIM Diary",
     description: "감정일기",
+    href: "/diary",
     icon: BookOpenText
   },
   {
     name: "SHIM Report",
     description: "주간·월간 감정 분석",
+    href: "/report",
     icon: BarChart3
   },
   {
     name: "SHIM Care",
     description: "감정 관리 루틴",
+    href: "/care",
     icon: HeartPulse
   }
 ];
@@ -79,46 +89,27 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
             <h1>shim.ai</h1>
             <p>
               SHIM AI는 감정 인식, 자기이해, 회복 습관을 돕는 기능들을 하나씩 확장해가는 베타 서비스입니다.
-              현재는 심리테스트 영역인 {TEST_CATEGORY}부터 열어두었습니다.
+              원하는 영역을 선택해 현재 이용 가능한 콘텐츠를 확인해보세요.
             </p>
           </div>
         </section>
 
-        <section className="service-map" aria-label="SHIM AI 서비스 구성">
-          {upcomingServices.map((service) => {
+        <section className="service-map" aria-label="SHIM AI 서비스 선택">
+          {services.map((service) => {
             const Icon = service.icon;
             return (
-              <article className="service-map-item" key={service.name}>
-                <span className="service-map-icon">
-                  <Icon size={20} aria-hidden="true" />
-                </span>
-                <strong>{service.name}</strong>
-                <span>{service.description}</span>
-              </article>
+              <Link href={service.href} key={service.name}>
+                <a className="service-map-item">
+                  <span className="service-map-icon">
+                    <Icon size={20} aria-hidden="true" />
+                  </span>
+                  <strong>{service.name}</strong>
+                  <span className="service-map-description">{service.description}</span>
+                  <ArrowRight className="service-map-arrow" size={18} aria-hidden="true" />
+                </a>
+              </Link>
             );
           })}
-        </section>
-
-        <section className="test-category" aria-label={TEST_CATEGORY}>
-          <div className="section-heading">
-            <span>{TEST_CATEGORY}</span>
-            <h2>지금 참여 가능한 테스트</h2>
-          </div>
-
-          <Link href="/mind">
-            <a className="test-card">
-              <span className="test-card-icon">
-                <BrainCircuit size={22} aria-hidden="true" />
-              </span>
-              <span className="test-card-body">
-                <strong>{TEST_NAME}</strong>
-                <span>
-                  정서 인식, 스트레스 대처, 회복 탄력성 단서를 바탕으로 현재 나의 감정 조절 패턴을 살펴봅니다.
-                </span>
-              </span>
-              <ArrowRight size={20} aria-hidden="true" />
-            </a>
-          </Link>
         </section>
 
         <p className="notice">{disclaimer}</p>

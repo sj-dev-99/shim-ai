@@ -134,6 +134,14 @@ export const mockAdminData: AdminData = {
   ],
   versionNotes: [
     {
+      id: "ver-003",
+      version: "Beta v0.1.2",
+      title: "서비스 카테고리 라우팅 추가",
+      description:
+        "SHIM Test, SHIM Talk, SHIM Diary, SHIM Report, SHIM Care를 각각 클릭 가능한 서비스 항목으로 분리했습니다.",
+      createdAt: "2026-07-09T17:00:00+09:00"
+    },
+    {
       id: "ver-002",
       version: "Beta v0.1.1",
       title: "서비스 허브 구조 개편",

@@ -229,8 +229,9 @@ input {
 }
 
 .service-map-item {
+  position: relative;
   display: grid;
-  grid-template-columns: 38px 1fr;
+  grid-template-columns: 38px 1fr 20px;
   gap: 4px 10px;
   align-items: center;
   min-height: 72px;
@@ -238,6 +239,12 @@ input {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel-clear);
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.service-map-item:hover {
+  border-color: var(--teal-strong);
+  transform: translateY(-1px);
 }
 
 .service-map-icon {
@@ -255,9 +262,14 @@ input {
   font-size: 15px;
 }
 
-.service-map-item span:last-child {
+.service-map-description {
   color: var(--muted);
   font-size: 13px;
+}
+
+.service-map-arrow {
+  grid-row: span 2;
+  color: var(--muted);
 }
 
 .test-category {
@@ -281,6 +293,46 @@ input {
   margin: 0;
   font-size: 22px;
   line-height: 1.2;
+}
+
+.coming-soon-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 36px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+  box-shadow: var(--shadow);
+}
+
+.coming-soon-panel h1 {
+  margin: 2px 0 0;
+  font-size: 42px;
+  line-height: 1;
+}
+
+.coming-soon-panel p {
+  max-width: 560px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.coming-soon-meta {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--teal);
+  font-size: 14px;
+  font-weight: 900;
 }
 
 .test-card {

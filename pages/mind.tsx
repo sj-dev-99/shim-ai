@@ -22,10 +22,10 @@ export default function MindPage({ theme, toggleTheme }: MindPageProps) {
       </Head>
       <main className="page-shell">
         <header className="topbar">
-          <Link href="/">
+          <Link href="/shim-test">
             <a className="ghost-link">
               <ArrowLeft size={17} aria-hidden="true" />
-              테스트 선택
+              SHIM Test
             </a>
           </Link>
           <div className="brand">

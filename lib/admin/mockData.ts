@@ -37,24 +37,6 @@ export const mockAdminData: AdminData = {
       createdAt: "2026-07-08T20:05:00+09:00",
       status: "new",
       adminMemo: ""
-    },
-    {
-      id: "fb-005",
-      userName: "익명",
-      rating: 4,
-      message: "결과 유형별 추천 행동이 조금 더 구체적이면 좋겠습니다.",
-      createdAt: "2026-07-08T18:38:00+09:00",
-      status: "reviewing",
-      adminMemo: ""
-    },
-    {
-      id: "fb-006",
-      userName: "수연",
-      rating: 5,
-      message: "의료 진단이 아니라는 안내가 명확해서 안심됐어요.",
-      createdAt: "2026-07-08T15:04:00+09:00",
-      status: "completed",
-      adminMemo: "안내 문구 유지"
     }
   ],
   bugReports: [
@@ -87,26 +69,6 @@ export const mockAdminData: AdminData = {
       createdAt: "2026-07-08T19:11:00+09:00",
       status: "fixed",
       adminMemo: "CSS shadow 조정 완료"
-    },
-    {
-      id: "bug-004",
-      page: "/mind",
-      message: "네트워크가 느릴 때 아이콘 로딩이 약간 늦습니다.",
-      device: "Windows laptop",
-      browser: "Edge 126",
-      createdAt: "2026-07-08T17:44:00+09:00",
-      status: "new",
-      adminMemo: ""
-    },
-    {
-      id: "bug-005",
-      page: "/test",
-      message: "키보드만으로 선택할 때 포커스가 더 잘 보이면 좋겠습니다.",
-      device: "MacBook Air",
-      browser: "Chrome 126",
-      createdAt: "2026-07-08T13:22:00+09:00",
-      status: "reviewing",
-      adminMemo: "접근성 개선 후보"
     }
   ],
   aiRatings: [
@@ -114,7 +76,7 @@ export const mockAdminData: AdminData = {
       id: "rate-001",
       rating: "up",
       comment: "내 상태를 부드럽게 설명해줘서 좋았습니다.",
-      resultType: "균형 탐색형",
+      resultType: "균형 조율형",
       createdAt: "2026-07-09T10:20:00+09:00"
     },
     {
@@ -128,22 +90,8 @@ export const mockAdminData: AdminData = {
       id: "rate-003",
       rating: "up",
       comment: "결과 유형 이름이 기억에 남아요.",
-      resultType: "회복 루틴형",
+      resultType: "회복 추진형",
       createdAt: "2026-07-08T21:35:00+09:00"
-    },
-    {
-      id: "rate-004",
-      rating: "up",
-      comment: "친구와 같이 해보고 싶습니다.",
-      resultType: "관계 조율형",
-      createdAt: "2026-07-08T18:02:00+09:00"
-    },
-    {
-      id: "rate-005",
-      rating: "down",
-      comment: "문장이 조금 길게 느껴졌습니다.",
-      resultType: "균형 탐색형",
-      createdAt: "2026-07-08T14:49:00+09:00"
     }
   ],
   visitorLogs: [
@@ -182,32 +130,22 @@ export const mockAdminData: AdminData = {
       browser: "Safari 18",
       completedTest: true,
       exitPoint: "다시 테스트하기"
-    },
-    {
-      id: "visit-005",
-      visitedAt: "2026-07-08T23:02:00+09:00",
-      page: "/",
-      device: "iPad",
-      browser: "Safari 18",
-      completedTest: false,
-      exitPoint: "테스트 선택"
-    },
-    {
-      id: "visit-006",
-      visitedAt: "2026-07-08T22:17:00+09:00",
-      page: "/result",
-      device: "Android tablet",
-      browser: "Chrome 126",
-      completedTest: true,
-      exitPoint: "브라우저 닫기"
     }
   ],
   versionNotes: [
     {
+      id: "ver-002",
+      version: "Beta v0.1.1",
+      title: "서비스 허브 구조 개편",
+      description:
+        "메인 페이지에 SHIM Test 상위 카테고리를 추가하고, 기존 테스트명을 AI 감정·회복 유형 테스트로 변경했습니다.",
+      createdAt: "2026-07-09T16:30:00+09:00"
+    },
+    {
       id: "ver-001",
       version: "Beta v0.1.0",
       title: "베타 테스트 공개",
-      description: "AI 마음결 테스트, 피드백 수집, 오류 신고, 만족도 기능을 포함한 첫 베타 버전입니다.",
+      description: "초기 심리테스트, 피드백 수집, 오류 신고, 만족도 기능을 포함한 첫 베타 버전입니다.",
       createdAt: "2026-07-09T12:00:00+09:00"
     }
   ]

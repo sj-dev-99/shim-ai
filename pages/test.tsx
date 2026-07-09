@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { ArrowLeft, ArrowRight, BrainCircuit, Check, RotateCcw } from "lucide-react";
 import { useMemo, useState } from "react";
-import { disclaimer, options, questions } from "../lib/data";
+import { disclaimer, options, questions, TEST_NAME } from "../lib/data";
 
 export default function TestPage() {
   const router = useRouter();
@@ -43,14 +43,14 @@ export default function TestPage() {
   return (
     <>
       <Head>
-        <title>테스트 | AI 마음결 테스트</title>
+        <title>테스트 | {TEST_NAME}</title>
       </Head>
       <main className="page-shell">
         <header className="topbar">
-          <Link href="/">
+          <Link href="/mind">
             <a className="ghost-link">
               <ArrowLeft size={17} aria-hidden="true" />
-              메인
+              소개
             </a>
           </Link>
           <div className="brand">

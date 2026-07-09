@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, BrainCircuit, Clock3, Moon, Sparkles, Sun } from "lucide-react";
-import { disclaimer } from "../lib/data";
+import { disclaimer, TEST_CATEGORY, TEST_NAME } from "../lib/data";
 
 type MindPageProps = {
   theme: "light" | "dark";
@@ -14,8 +14,11 @@ export default function MindPage({ theme, toggleTheme }: MindPageProps) {
   return (
     <>
       <Head>
-        <title>AI 마음결 테스트 | shim.ai</title>
-        <meta name="description" content="12문항으로 살펴보는 자기이해용 심리테스트" />
+        <title>{TEST_NAME} | shim.ai</title>
+        <meta
+          name="description"
+          content="감정 인식, 스트레스 대처, 회복 탄력성 단서를 바탕으로 현재 감정 조절 패턴을 살펴보는 심리테스트"
+        />
       </Head>
       <main className="page-shell">
         <header className="topbar">
@@ -47,12 +50,12 @@ export default function MindPage({ theme, toggleTheme }: MindPageProps) {
           <div>
             <span className="eyebrow">
               <Sparkles size={15} aria-hidden="true" />
-              12문항 자기이해 체크
+              {TEST_CATEGORY}
             </span>
-            <h1>AI 마음결 테스트</h1>
+            <h1>{TEST_NAME}</h1>
             <p>
-              최근의 감정 인식, 적응 방식, 회복 습관을 바탕으로 지금 나에게 가까운 마음의
-              패턴을 살펴보세요.
+              이 테스트는 정서 인식, 스트레스 대처 방식, 회복 탄력성, 행동 활성화 경향을 12문항으로 살펴봅니다.
+              임상 진단이 아니라, 현재 나의 감정 조절 패턴을 더 구체적으로 이해하기 위한 자기보고형 체크입니다.
             </p>
             <div className="actions">
               <Link href="/test">
@@ -70,16 +73,16 @@ export default function MindPage({ theme, toggleTheme }: MindPageProps) {
 
         <section className="insight-band" aria-label="테스트 구성">
           <div className="insight-item">
-            <strong>5지선다 응답</strong>
-            <span>매우 아니다부터 매우 그렇다까지 자연스럽게 고르면 됩니다.</span>
+            <strong>정서 인식</strong>
+            <span>내 감정을 알아차리고 언어화하는 정도를 확인합니다.</span>
+          </div>
+          <div className="insight-item">
+            <strong>대처와 회복</strong>
+            <span>스트레스 상황에서 사용하는 조절 방식과 회복 루틴을 살펴봅니다.</span>
           </div>
           <div className="insight-item">
             <strong>4가지 결과 유형</strong>
-            <span>총점에 따라 현재 마음 패턴을 네 가지 유형으로 정리합니다.</span>
-          </div>
-          <div className="insight-item">
-            <strong>모바일 최적화</strong>
-            <span>짧은 이동 시간에도 편하게 완료할 수 있도록 구성했습니다.</span>
+            <span>점수에 따라 감정 관찰형, 균형 조율형, 변화 실행형, 회복 추진형으로 정리합니다.</span>
           </div>
         </section>
 

@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { ArrowLeft, BrainCircuit, RotateCcw, Send, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { submitBetaEvent } from "../lib/beta";
-import { disclaimer, getResultByScore } from "../lib/data";
+import { disclaimer, getResultByScore, TEST_NAME } from "../lib/data";
 
 export default function ResultPage() {
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function ResultPage() {
   return (
     <>
       <Head>
-        <title>결과 | AI 마음결 테스트</title>
+        <title>결과 | {TEST_NAME}</title>
       </Head>
       <main className="page-shell">
         <header className="topbar">
@@ -147,7 +147,7 @@ export default function ResultPage() {
             </Link>
             <Link href="/">
               <a className="secondary-button">
-                공유 전 확인
+                다른 기능 보기
                 <Share2 size={18} aria-hidden="true" />
               </a>
             </Link>

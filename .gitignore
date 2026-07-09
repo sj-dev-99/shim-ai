@@ -1,5 +1,6 @@
 .next/
 .next-build-*/
+.next-admin-build-*/
 node_modules/
 out/
 dist/

@@ -26,6 +26,7 @@ function saveTheme(theme: "light" | "dark") {
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
+  const isAdminRoute = router.pathname.startsWith("/admin");
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
@@ -37,6 +38,8 @@ export default function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     function logPageView(path: string) {
+      if (path.startsWith("/admin")) return;
+
       submitBetaEvent({
         eventType: "page_view",
         path,
@@ -64,7 +67,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Component {...pageProps} theme={theme} toggleTheme={toggleTheme} />
-      <BetaDock />
+      {isAdminRoute ? null : <BetaDock />}
     </>
   );
 }

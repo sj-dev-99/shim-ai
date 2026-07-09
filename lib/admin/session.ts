@@ -3,8 +3,6 @@ import type { IncomingMessage } from "http";
 
 export const ADMIN_COOKIE_NAME = "shim_admin_session";
 
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
-
 function getAdminPassword() {
   return process.env.ADMIN_PASSWORD || "";
 }
@@ -63,7 +61,20 @@ export function createAdminSessionCookie() {
     "Path=/",
     "HttpOnly",
     "SameSite=Lax",
-    `Max-Age=${SESSION_MAX_AGE_SECONDS}`,
+    secure
+  ]
+    .filter(Boolean)
+    .join("; ");
+}
+
+export function clearAdminSessionCookie() {
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  return [
+    `${ADMIN_COOKIE_NAME}=`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    "Max-Age=0",
     secure
   ]
     .filter(Boolean)

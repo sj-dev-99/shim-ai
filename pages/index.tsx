@@ -5,6 +5,7 @@ import {
   BarChart3,
   BookOpenText,
   BrainCircuit,
+  ClipboardCheck,
   HeartPulse,
   MessageCircleHeart,
   Moon,
@@ -23,7 +24,7 @@ const services = [
     name: "SHIM Test",
     description: "심리테스트",
     href: "/shim-test",
-    icon: BrainCircuit
+    icon: ClipboardCheck
   },
   {
     name: "SHIM Talk",

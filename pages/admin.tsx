@@ -209,10 +209,23 @@ export const getServerSideProps: GetServerSideProps<AdminPageProps> = async ({ r
 };
 
 function AdminDashboard({ initialData }: { initialData: AdminData }) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [data, setData] = useState(initialData);
   const [versionDraft, setVersionDraft] = useState("");
   const session = getTemporaryAdminSession();
+
+  useEffect(() => {
+    function clearSessionOnAdminExit(nextUrl: string) {
+      if (nextUrl.startsWith("/admin")) return;
+      navigator.sendBeacon?.("/api/admin/logout", new Blob(["{}"], { type: "application/json" }));
+    }
+
+    router.events.on("routeChangeStart", clearSessionOnAdminExit);
+    return () => {
+      router.events.off("routeChangeStart", clearSessionOnAdminExit);
+    };
+  }, [router.events]);
 
   useEffect(() => {
     let mounted = true;
@@ -681,7 +694,6 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                         {item.version} · {item.title}
                       </strong>
                       <p>{item.description}</p>
-                      <SourceBadge source={item.source} />
                     </article>
                   ))}
                 </div>

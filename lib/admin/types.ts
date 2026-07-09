@@ -1,8 +1,14 @@
 export type FeedbackStatus = "new" | "reviewing" | "completed";
 export type BugReportStatus = "new" | "reviewing" | "fixed";
-export type RatingValue = "up" | "down";
+export type RatingValue = "up" | "down" | "opinion";
 
-export interface Feedback {
+export type AdminDataSource = "live" | "mock";
+
+export interface AdminRecordMeta {
+  source?: AdminDataSource;
+}
+
+export interface Feedback extends AdminRecordMeta {
   id: string;
   userName: string;
   rating: number;
@@ -12,7 +18,7 @@ export interface Feedback {
   adminMemo: string;
 }
 
-export interface BugReport {
+export interface BugReport extends AdminRecordMeta {
   id: string;
   page: string;
   message: string;
@@ -23,7 +29,7 @@ export interface BugReport {
   adminMemo: string;
 }
 
-export interface AiRating {
+export interface AiRating extends AdminRecordMeta {
   id: string;
   rating: RatingValue;
   comment: string;
@@ -31,7 +37,7 @@ export interface AiRating {
   createdAt: string;
 }
 
-export interface VisitorLog {
+export interface VisitorLog extends AdminRecordMeta {
   id: string;
   visitedAt: string;
   page: string;
@@ -41,7 +47,7 @@ export interface VisitorLog {
   exitPoint: string;
 }
 
-export interface VersionNote {
+export interface VersionNote extends AdminRecordMeta {
   id: string;
   version: string;
   title: string;
@@ -55,4 +61,7 @@ export interface AdminData {
   aiRatings: AiRating[];
   visitorLogs: VisitorLog[];
   versionNotes: VersionNote[];
+  dataSource?: AdminDataSource;
+  storageStatus?: "connected" | "not_configured" | "error";
+  storageMessage?: string;
 }

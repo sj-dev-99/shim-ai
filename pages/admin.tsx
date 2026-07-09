@@ -1,13 +1,14 @@
 import type { GetServerSideProps } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   BarChart3,
   Bug,
   CheckCircle2,
   ClipboardList,
+  Database,
   LockKeyhole,
   MessageSquareText,
   MousePointerClick,
@@ -76,6 +77,11 @@ function isToday(value: string) {
 
 function StatusBadge({ children, tone }: { children: string; tone: "new" | "reviewing" | "done" }) {
   return <span className={`admin-status admin-status-${tone}`}>{children}</span>;
+}
+
+function SourceBadge({ source }: { source?: "live" | "mock" }) {
+  if (source !== "mock") return <span className="admin-source-live">실제</span>;
+  return <span className="admin-source-mock">샘플</span>;
 }
 
 function DashboardCard({
@@ -194,7 +200,6 @@ export const getServerSideProps: GetServerSideProps<AdminPageProps> = async ({ r
     };
   }
 
-  // Mock data enters through the repository boundary so a DB client can replace it later.
   return {
     props: {
       initialData: await getAdminData(),
@@ -207,10 +212,30 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [data, setData] = useState(initialData);
   const [versionDraft, setVersionDraft] = useState("");
-  // Temporary session placeholder. Replace with server-side auth and role checks later.
   const session = getTemporaryAdminSession();
 
-  // Derived dashboard metrics stay close to the UI while raw data access stays in lib/admin.
+  useEffect(() => {
+    let mounted = true;
+
+    async function refreshData() {
+      try {
+        const response = await fetch("/api/admin/data");
+        const result = await response.json();
+        if (mounted && response.ok && result.ok && result.data) {
+          setData(result.data);
+        }
+      } catch {
+        // Keep the current dashboard data if a polling request briefly fails.
+      }
+    }
+
+    const timer = window.setInterval(refreshData, 5000);
+    return () => {
+      mounted = false;
+      window.clearInterval(timer);
+    };
+  }, []);
+
   const ratingSummary = useMemo(() => {
     const up = data.aiRatings.filter((item) => item.rating === "up").length;
     const down = data.aiRatings.filter((item) => item.rating === "down").length;
@@ -224,45 +249,54 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
     [data.visitorLogs]
   );
 
-  // These local mutators mimic optimistic updates until Supabase/Firebase persistence is added.
-  function updateFeedbackStatus(id: string, status: FeedbackStatus) {
-    setData((current) => {
-      if (!current) return current;
-      return {
-        ...current,
-        feedbacks: current.feedbacks.map((item) => (item.id === id ? { ...item, status } : item))
-      };
+  function persistRecord(type: "feedback" | "bug", id: string, status?: FeedbackStatus | BugReportStatus, adminMemo?: string) {
+    fetch("/api/admin/update-record", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ type, id, status, adminMemo })
+    }).catch(() => {
+      // The local optimistic update remains visible; polling will reconcile later.
     });
+  }
+
+  function updateFeedbackStatus(id: string, status: FeedbackStatus) {
+    setData((current) => ({
+      ...current,
+      feedbacks: current.feedbacks.map((item) => (item.id === id ? { ...item, status } : item))
+    }));
+    persistRecord("feedback", id, status);
   }
 
   function updateFeedbackMemo(id: string, adminMemo: string) {
-    setData((current) => {
-      if (!current) return current;
-      return {
-        ...current,
-        feedbacks: current.feedbacks.map((item) => (item.id === id ? { ...item, adminMemo } : item))
-      };
-    });
+    setData((current) => ({
+      ...current,
+      feedbacks: current.feedbacks.map((item) => (item.id === id ? { ...item, adminMemo } : item))
+    }));
+  }
+
+  function saveFeedbackMemo(id: string, adminMemo: string) {
+    persistRecord("feedback", id, undefined, adminMemo);
   }
 
   function updateBugStatus(id: string, status: BugReportStatus) {
-    setData((current) => {
-      if (!current) return current;
-      return {
-        ...current,
-        bugReports: current.bugReports.map((item) => (item.id === id ? { ...item, status } : item))
-      };
-    });
+    setData((current) => ({
+      ...current,
+      bugReports: current.bugReports.map((item) => (item.id === id ? { ...item, status } : item))
+    }));
+    persistRecord("bug", id, status);
   }
 
   function updateBugMemo(id: string, adminMemo: string) {
-    setData((current) => {
-      if (!current) return current;
-      return {
-        ...current,
-        bugReports: current.bugReports.map((item) => (item.id === id ? { ...item, adminMemo } : item))
-      };
-    });
+    setData((current) => ({
+      ...current,
+      bugReports: current.bugReports.map((item) => (item.id === id ? { ...item, adminMemo } : item))
+    }));
+  }
+
+  function saveBugMemo(id: string, adminMemo: string) {
+    persistRecord("bug", id, undefined, adminMemo);
   }
 
   function addVersionNote(event: FormEvent<HTMLFormElement>) {
@@ -274,16 +308,14 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
       version: BETA_VERSION,
       title: `${BETA_VERSION} 업데이트 메모`,
       description: versionDraft.trim(),
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      source: "live"
     };
 
-    setData((current) => {
-      if (!current) return current;
-      return {
-        ...current,
-        versionNotes: [nextNote, ...current.versionNotes]
-      };
-    });
+    setData((current) => ({
+      ...current,
+      versionNotes: [nextNote, ...current.versionNotes]
+    }));
     setVersionDraft("");
   }
 
@@ -337,6 +369,11 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
             <span className="admin-version">{BETA_VERSION}</span>
           </header>
 
+          <div className={`admin-data-banner admin-data-${data.storageStatus || "not_configured"}`}>
+            <Database size={18} aria-hidden="true" />
+            <span>{data.storageMessage || "베타 운영 데이터를 확인하고 있습니다."}</span>
+          </div>
+
           {activeTab === "dashboard" ? (
             <div className="admin-section-stack">
               <section className="admin-stat-grid" aria-label="베타 운영 요약">
@@ -373,6 +410,7 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                         <strong>{item.userName}</strong>
                         <p>{item.message}</p>
                         <span>{formatDate(item.createdAt)}</span>
+                        <SourceBadge source={item.source} />
                       </article>
                     ))}
                   </div>
@@ -389,6 +427,7 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                         <strong>{item.page}</strong>
                         <p>{item.message}</p>
                         <span>{formatDate(item.createdAt)}</span>
+                        <SourceBadge source={item.source} />
                       </article>
                     ))}
                   </div>
@@ -407,6 +446,7 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                 <table className="admin-table">
                   <thead>
                     <tr>
+                      <th>구분</th>
                       <th>사용자</th>
                       <th>평점</th>
                       <th>피드백 내용</th>
@@ -418,8 +458,9 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                   <tbody>
                     {data.feedbacks.map((item) => (
                       <tr key={item.id}>
+                        <td><SourceBadge source={item.source} /></td>
                         <td>{item.userName}</td>
-                        <td>{`${item.rating}점`}</td>
+                        <td>{item.rating ? `${item.rating}점` : "-"}</td>
                         <td>{item.message}</td>
                         <td>{formatDate(item.createdAt)}</td>
                         <td>
@@ -446,8 +487,8 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                             rows={3}
                             value={item.adminMemo}
                           />
-                          <button className="admin-save-button" type="button">
-                            저장됨
+                          <button className="admin-save-button" onClick={() => saveFeedbackMemo(item.id, item.adminMemo)} type="button">
+                            저장
                           </button>
                         </td>
                       </tr>
@@ -468,6 +509,7 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                 <table className="admin-table">
                   <thead>
                     <tr>
+                      <th>구분</th>
                       <th>발생 페이지</th>
                       <th>오류 내용</th>
                       <th>기기</th>
@@ -480,6 +522,7 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                   <tbody>
                     {data.bugReports.map((item) => (
                       <tr key={item.id}>
+                        <td><SourceBadge source={item.source} /></td>
                         <td>{item.page}</td>
                         <td>{item.message}</td>
                         <td>{item.device}</td>
@@ -509,8 +552,8 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                             rows={3}
                             value={item.adminMemo}
                           />
-                          <button className="admin-save-button" type="button">
-                            저장됨
+                          <button className="admin-save-button" onClick={() => saveBugMemo(item.id, item.adminMemo)} type="button">
+                            저장
                           </button>
                         </td>
                       </tr>
@@ -525,12 +568,12 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
             <div className="admin-section-stack">
               <section className="admin-stat-grid compact">
                 <DashboardCard icon={ThumbsUp} label="좋아요" value={`${ratingSummary.up}건`} helper="긍정 응답" />
-                <DashboardCard icon={ThumbsDown} label="싫어요" value={`${ratingSummary.down}건`} helper="개선 필요 응답" />
+                <DashboardCard icon={ThumbsDown} label="아쉬워요" value={`${ratingSummary.down}건`} helper="개선 필요 응답" />
                 <DashboardCard
                   icon={CheckCircle2}
                   label="만족도"
                   value={`${ratingSummary.percent}%`}
-                  helper={`${ratingSummary.total}개 응답 기준`}
+                  helper={`${ratingSummary.total}개 만족도 응답 기준`}
                 />
               </section>
               <div className="admin-panel">
@@ -542,6 +585,7 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                   <table className="admin-table">
                     <thead>
                       <tr>
+                        <th>구분</th>
                         <th>평가</th>
                         <th>결과 유형</th>
                         <th>추가 의견</th>
@@ -551,9 +595,10 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                     <tbody>
                       {data.aiRatings.map((item) => (
                         <tr key={item.id}>
-                          <td>{item.rating === "up" ? "좋아요" : "싫어요"}</td>
+                          <td><SourceBadge source={item.source} /></td>
+                          <td>{item.rating === "up" ? "좋아요" : item.rating === "down" ? "아쉬워요" : "의견"}</td>
                           <td>{item.resultType}</td>
-                          <td>{item.comment}</td>
+                          <td>{item.comment || "-"}</td>
                           <td>{formatDate(item.createdAt)}</td>
                         </tr>
                       ))}
@@ -574,6 +619,7 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                 <table className="admin-table">
                   <thead>
                     <tr>
+                      <th>구분</th>
                       <th>접속 시간</th>
                       <th>접속 페이지</th>
                       <th>기기</th>
@@ -585,6 +631,7 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                   <tbody>
                     {data.visitorLogs.map((item) => (
                       <tr key={item.id}>
+                        <td><SourceBadge source={item.source} /></td>
                         <td>{formatDate(item.visitedAt)}</td>
                         <td>{item.page}</td>
                         <td>{item.device}</td>
@@ -634,6 +681,7 @@ function AdminDashboard({ initialData }: { initialData: AdminData }) {
                         {item.version} · {item.title}
                       </strong>
                       <p>{item.description}</p>
+                      <SourceBadge source={item.source} />
                     </article>
                   ))}
                 </div>

@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { PersistedBetaEvent, saveBetaEvent } from "../../lib/admin/adminRepository";
 
 type BetaEvent = {
   eventType?: string;
@@ -26,7 +27,7 @@ function trimString(value: unknown, maxLength: number) {
   return value.trim().slice(0, maxLength);
 }
 
-function sanitizeEvent(body: BetaEvent) {
+function sanitizeEvent(body: BetaEvent): PersistedBetaEvent | null {
   const eventType = trimString(body.eventType, 40);
   if (!eventType || !allowedEvents.has(eventType)) return null;
 
@@ -78,9 +79,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   console.info("[beta-event]", JSON.stringify(event));
 
   try {
+    await saveBetaEvent(event);
     await forwardToWebhook(event);
   } catch (error) {
-    console.error("[beta-event-forward-error]", error);
+    console.error("[beta-event-save-or-forward-error]", error);
+    return res.status(500).json({ ok: false, error: "Failed to save beta event" });
   }
 
   return res.status(200).json({ ok: true });

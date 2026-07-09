@@ -58,7 +58,10 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
     <>
       <Head>
         <title>shim.ai</title>
-        <meta name="description" content="심리테스트와 감정 관리 기능을 제공하는 SHIM AI 베타 서비스" />
+        <meta
+          name="description"
+          content="심리테스트와 감정 관리 기능을 제공하는 SHIM AI 베타 서비스"
+        />
       </Head>
       <main className="page-shell">
         <header className="topbar">
@@ -88,8 +91,8 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
             </span>
             <h1>shim.ai</h1>
             <p>
-              SHIM AI는 감정 인식, 자기이해, 회복 습관을 돕는 기능들을 하나씩 확장해가는 베타 서비스입니다.
-              원하는 영역을 선택해 현재 이용 가능한 콘텐츠를 확인해보세요.
+              SHIM AI는 감정 인식, 자기이해, 회복 습관을 돕는 기능들을 하나씩 확장하는
+              베타 서비스입니다. 원하는 영역을 선택해 현재 이용 가능한 콘텐츠를 확인해보세요.
             </p>
           </div>
         </section>
@@ -101,11 +104,13 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
               <Link href={service.href} key={service.name}>
                 <a className="service-map-item">
                   <span className="service-map-icon">
-                    <Icon size={20} aria-hidden="true" />
+                    <Icon size={22} aria-hidden="true" />
                   </span>
                   <strong>{service.name}</strong>
                   <span className="service-map-description">{service.description}</span>
-                  <ArrowRight className="service-map-arrow" size={18} aria-hidden="true" />
+                  <span className="service-map-arrow" aria-hidden="true">
+                    <ArrowRight size={20} />
+                  </span>
                 </a>
               </Link>
             );

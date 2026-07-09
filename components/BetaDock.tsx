@@ -20,6 +20,7 @@ const modalCopy: Record<ModalType, { title: string; placeholder: string; button:
 export default function BetaDock() {
   const [modalType, setModalType] = useState<ModalType | null>(null);
   const [message, setMessage] = useState("");
+  const [score, setScore] = useState(5);
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -29,7 +30,8 @@ export default function BetaDock() {
     setStatus("sending");
     const ok = await submitBetaEvent({
       eventType: modalType,
-      message: message.trim()
+      message: message.trim(),
+      score: modalType === "feedback" ? score : undefined
     });
 
     if (ok) {
@@ -47,6 +49,7 @@ export default function BetaDock() {
 
   function open(type: ModalType) {
     setModalType(type);
+    setScore(5);
     setStatus("idle");
     setMessage("");
   }
@@ -80,6 +83,18 @@ export default function BetaDock() {
               </button>
             </div>
             <form onSubmit={submit}>
+              {modalType === "feedback" ? (
+                <label className="beta-score-field">
+                  <span>평점</span>
+                  <select onChange={(event) => setScore(Number(event.target.value))} value={score}>
+                    <option value={5}>5점 - 매우 만족</option>
+                    <option value={4}>4점 - 만족</option>
+                    <option value={3}>3점 - 보통</option>
+                    <option value={2}>2점 - 아쉬움</option>
+                    <option value={1}>1점 - 매우 아쉬움</option>
+                  </select>
+                </label>
+              ) : null}
               <textarea
                 className="beta-textarea"
                 onChange={(event) => setMessage(event.target.value)}

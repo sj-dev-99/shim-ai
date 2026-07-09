@@ -1,4 +1,6 @@
+import type { GetServerSideProps } from "next";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { FormEvent, useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -6,6 +8,7 @@ import {
   Bug,
   CheckCircle2,
   ClipboardList,
+  LockKeyhole,
   MessageSquareText,
   MousePointerClick,
   ThumbsDown,
@@ -15,6 +18,7 @@ import {
 } from "lucide-react";
 import { getAdminData } from "../lib/admin/adminRepository";
 import { getTemporaryAdminSession } from "../lib/admin/auth";
+import { isAdminRequestAuthenticated } from "../lib/admin/session";
 import {
   AdminData,
   BugReportStatus,
@@ -26,7 +30,8 @@ import { BETA_VERSION } from "../lib/beta";
 type AdminTab = "dashboard" | "feedbacks" | "bugs" | "ratings" | "visitors" | "versions";
 
 type AdminPageProps = {
-  initialData: AdminData;
+  initialData: AdminData | null;
+  isAuthenticated: boolean;
 };
 
 const adminTabs: Array<{ id: AdminTab; label: string; icon: typeof BarChart3 }> = [
@@ -108,16 +113,97 @@ function bugTone(status: BugReportStatus) {
   return status === "reviewing" ? "reviewing" : "new";
 }
 
-export async function getStaticProps() {
+function AdminLogin() {
+  const router = useRouter();
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function submitLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ password })
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.ok) {
+        setError(result.error || "로그인에 실패했습니다.");
+        return;
+      }
+
+      router.replace("/admin");
+    } catch {
+      setError("로그인 요청 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <>
+      <Head>
+        <title>Admin Login | shim.ai</title>
+        <meta name="robots" content="noindex,nofollow,noarchive" />
+      </Head>
+      <main className="admin-login-shell">
+        <section className="admin-login-card" aria-label="관리자 로그인">
+          <span className="admin-login-icon">
+            <LockKeyhole size={24} aria-hidden="true" />
+          </span>
+          <span className="admin-kicker">SHIM AI Admin</span>
+          <h1>관리자 비밀번호를 입력해주세요</h1>
+          <p>베타 운영 데이터는 관리자 인증 후에만 확인할 수 있습니다.</p>
+          <form className="admin-login-form" onSubmit={submitLogin}>
+            <label htmlFor="admin-password">비밀번호</label>
+            <input
+              autoComplete="current-password"
+              id="admin-password"
+              onChange={(event) => setPassword(event.target.value)}
+              type="password"
+              value={password}
+            />
+            {error ? <p className="admin-login-error">{error}</p> : null}
+            <button className="admin-primary-button" disabled={!password || isSubmitting} type="submit">
+              {isSubmitting ? "확인 중" : "관리자 페이지 열기"}
+            </button>
+          </form>
+        </section>
+      </main>
+    </>
+  );
+}
+
+export const getServerSideProps: GetServerSideProps<AdminPageProps> = async ({ req, res }) => {
+  res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+
+  const isAuthenticated = isAdminRequestAuthenticated(req);
+  if (!isAuthenticated) {
+    return {
+      props: {
+        initialData: null,
+        isAuthenticated: false
+      }
+    };
+  }
+
   // Mock data enters through the repository boundary so a DB client can replace it later.
   return {
     props: {
-      initialData: await getAdminData()
+      initialData: await getAdminData(),
+      isAuthenticated: true
     }
   };
-}
+};
 
-export default function AdminPage({ initialData }: AdminPageProps) {
+function AdminDashboard({ initialData }: { initialData: AdminData }) {
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [data, setData] = useState(initialData);
   const [versionDraft, setVersionDraft] = useState("");
@@ -140,31 +226,43 @@ export default function AdminPage({ initialData }: AdminPageProps) {
 
   // These local mutators mimic optimistic updates until Supabase/Firebase persistence is added.
   function updateFeedbackStatus(id: string, status: FeedbackStatus) {
-    setData((current) => ({
-      ...current,
-      feedbacks: current.feedbacks.map((item) => (item.id === id ? { ...item, status } : item))
-    }));
+    setData((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        feedbacks: current.feedbacks.map((item) => (item.id === id ? { ...item, status } : item))
+      };
+    });
   }
 
   function updateFeedbackMemo(id: string, adminMemo: string) {
-    setData((current) => ({
-      ...current,
-      feedbacks: current.feedbacks.map((item) => (item.id === id ? { ...item, adminMemo } : item))
-    }));
+    setData((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        feedbacks: current.feedbacks.map((item) => (item.id === id ? { ...item, adminMemo } : item))
+      };
+    });
   }
 
   function updateBugStatus(id: string, status: BugReportStatus) {
-    setData((current) => ({
-      ...current,
-      bugReports: current.bugReports.map((item) => (item.id === id ? { ...item, status } : item))
-    }));
+    setData((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        bugReports: current.bugReports.map((item) => (item.id === id ? { ...item, status } : item))
+      };
+    });
   }
 
   function updateBugMemo(id: string, adminMemo: string) {
-    setData((current) => ({
-      ...current,
-      bugReports: current.bugReports.map((item) => (item.id === id ? { ...item, adminMemo } : item))
-    }));
+    setData((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        bugReports: current.bugReports.map((item) => (item.id === id ? { ...item, adminMemo } : item))
+      };
+    });
   }
 
   function addVersionNote(event: FormEvent<HTMLFormElement>) {
@@ -179,10 +277,13 @@ export default function AdminPage({ initialData }: AdminPageProps) {
       createdAt: new Date().toISOString()
     };
 
-    setData((current) => ({
-      ...current,
-      versionNotes: [nextNote, ...current.versionNotes]
-    }));
+    setData((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        versionNotes: [nextNote, ...current.versionNotes]
+      };
+    });
     setVersionDraft("");
   }
 
@@ -191,6 +292,7 @@ export default function AdminPage({ initialData }: AdminPageProps) {
       <Head>
         <title>Admin Dashboard | shim.ai</title>
         <meta name="description" content="SHIM AI 베타 테스트 운영 관리자 페이지" />
+        <meta name="robots" content="noindex,nofollow,noarchive" />
       </Head>
       <main className="admin-shell">
         <aside className="admin-sidebar">
@@ -238,12 +340,7 @@ export default function AdminPage({ initialData }: AdminPageProps) {
           {activeTab === "dashboard" ? (
             <div className="admin-section-stack">
               <section className="admin-stat-grid" aria-label="베타 운영 요약">
-                <DashboardCard
-                  icon={Users}
-                  label="오늘 방문자 수"
-                  value={`${todayVisitors}명`}
-                  helper="방문자 로그 기준"
-                />
+                <DashboardCard icon={Users} label="오늘 방문자 수" value={`${todayVisitors}명`} helper="방문자 로그 기준" />
                 <DashboardCard
                   icon={MessageSquareText}
                   label="총 피드백 수"
@@ -322,7 +419,7 @@ export default function AdminPage({ initialData }: AdminPageProps) {
                     {data.feedbacks.map((item) => (
                       <tr key={item.id}>
                         <td>{item.userName}</td>
-                        <td>{"★".repeat(item.rating)}</td>
+                        <td>{`${item.rating}점`}</td>
                         <td>{item.message}</td>
                         <td>{formatDate(item.createdAt)}</td>
                         <td>
@@ -454,7 +551,7 @@ export default function AdminPage({ initialData }: AdminPageProps) {
                     <tbody>
                       {data.aiRatings.map((item) => (
                         <tr key={item.id}>
-                          <td>{item.rating === "up" ? "👍 좋아요" : "👎 싫어요"}</td>
+                          <td>{item.rating === "up" ? "좋아요" : "싫어요"}</td>
                           <td>{item.resultType}</td>
                           <td>{item.comment}</td>
                           <td>{formatDate(item.createdAt)}</td>
@@ -533,7 +630,9 @@ export default function AdminPage({ initialData }: AdminPageProps) {
                   {data.versionNotes.map((item) => (
                     <article key={item.id}>
                       <span>{formatDate(item.createdAt)}</span>
-                      <strong>{item.version} · {item.title}</strong>
+                      <strong>
+                        {item.version} · {item.title}
+                      </strong>
                       <p>{item.description}</p>
                     </article>
                   ))}
@@ -545,4 +644,12 @@ export default function AdminPage({ initialData }: AdminPageProps) {
       </main>
     </>
   );
+}
+
+export default function AdminPage({ initialData, isAuthenticated }: AdminPageProps) {
+  if (!isAuthenticated || !initialData) {
+    return <AdminLogin />;
+  }
+
+  return <AdminDashboard initialData={initialData} />;
 }

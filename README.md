@@ -43,6 +43,8 @@ npm run build
 NEXT_PUBLIC_BETA_VERSION="Beta v0.1.0"
 BETA_EVENT_WEBHOOK_URL=""
 BETA_EVENT_WEBHOOK_TOKEN=""
+ADMIN_PASSWORD=""
+ADMIN_SESSION_SECRET=""
 ```
 
 주의 사항:
@@ -50,6 +52,8 @@ BETA_EVENT_WEBHOOK_TOKEN=""
 - 브라우저에 노출되어도 되는 값만 `NEXT_PUBLIC_` 접두사를 사용합니다.
 - API Key, 토큰, 비밀번호 같은 민감정보에는 `NEXT_PUBLIC_`을 붙이지 않습니다.
 - `.env`, `.env.local`, `.env.production.local` 등 실제 환경변수 파일은 `.gitignore`로 제외합니다.
+- `/admin` 관리자 페이지는 `ADMIN_PASSWORD`로 보호합니다.
+- `ADMIN_SESSION_SECRET`은 관리자 세션 쿠키 서명에 쓰는 긴 랜덤 문자열로 설정하는 것을 권장합니다.
 
 ## 베타 이벤트 로그
 

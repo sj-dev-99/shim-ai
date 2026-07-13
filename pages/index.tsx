@@ -33,18 +33,18 @@ const services = [
     status: "OPEN"
   },
   {
-    name: "SHIM Talk",
-    description: "대화형 감정 정리와 자기이해 코칭",
-    href: "/talk",
-    icon: MessageCircleHeart,
-    status: "준비중"
-  },
-  {
     name: "SHIM Diary",
     description: "오늘의 감정을 기록하면 AI가 작은 위로와 한줄 코멘트를 남겨드립니다.",
     href: "/diary",
     icon: BookOpenText,
     status: "OPEN"
+  },
+  {
+    name: "SHIM Talk",
+    description: "대화형 감정 정리와 자기이해 코칭",
+    href: "/talk",
+    icon: MessageCircleHeart,
+    status: "준비중"
   },
   {
     name: "SHIM Report",
@@ -121,6 +121,21 @@ const dailyQuotes = [
   "오늘 하루를 버텨낸 것만으로도 마음은 제 몫을 해냈습니다."
 ];
 
+const moodOptions = [
+  { emoji: "😊", label: "좋아요", note: "오늘의 좋은 감정을 조금 더 오래 머물게 해보세요." },
+  { emoji: "😌", label: "평온해요", note: "차분한 마음을 기록하면 나만의 안정 패턴이 보입니다." },
+  { emoji: "🥰", label: "따뜻해요", note: "마음이 부드러운 날의 이유를 짧게 남겨보세요." },
+  { emoji: "🤩", label: "설레요", note: "기대되는 마음은 나를 움직이게 하는 좋은 신호입니다." },
+  { emoji: "🙂", label: "괜찮아요", note: "아주 특별하지 않아도 충분히 괜찮은 하루가 있습니다." },
+  { emoji: "😐", label: "무덤덤해요", note: "감정이 선명하지 않은 날도 그대로 기록할 수 있어요." },
+  { emoji: "😕", label: "복잡해요", note: "엉킨 마음은 적어보는 순간 조금씩 정리되기 시작합니다." },
+  { emoji: "😟", label: "불안해요", note: "불안의 크기보다 지금 필요한 안정을 먼저 살펴보세요." },
+  { emoji: "😢", label: "슬퍼요", note: "슬픈 마음도 이름을 붙이면 혼자 견디는 느낌이 줄어듭니다." },
+  { emoji: "😡", label: "화나요", note: "화가 난 이유를 안전하게 적어두면 마음의 경계가 보입니다." },
+  { emoji: "😴", label: "피곤해요", note: "지친 날에는 회복을 위한 작은 선택 하나면 충분합니다." },
+  { emoji: "🥺", label: "외로워요", note: "외로움도 오늘의 중요한 감정입니다. 조용히 들어봐도 괜찮아요." }
+];
+
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -146,6 +161,7 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
   const isDark = theme === "dark";
   const [dailyQuote, setDailyQuote] = useState(dailyQuotes[0]);
   const [recommendedCount, setRecommendedCount] = useState<number | null>(null);
+  const [selectedMood, setSelectedMood] = useState(moodOptions[0]);
 
   useEffect(() => {
     let timeoutId: number;
@@ -177,6 +193,20 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    const savedMood = window.localStorage.getItem("shim-home-mood");
+    const matchedMood = moodOptions.find((mood) => mood.label === savedMood);
+
+    if (matchedMood) {
+      setSelectedMood(matchedMood);
+    }
+  }, []);
+
+  function handleMoodSelect(mood: (typeof moodOptions)[number]) {
+    setSelectedMood(mood);
+    window.localStorage.setItem("shim-home-mood", mood.label);
+  }
 
   return (
     <>
@@ -241,6 +271,34 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
             <a className="primary-button">
               테스트 시작
               <ArrowRight size={18} aria-hidden="true" />
+            </a>
+          </Link>
+        </section>
+
+        <section className="mood-check" aria-label="오늘의 기분 선택">
+          <div className="mood-check-copy">
+            <span>오늘의 기분</span>
+            <h2>{selectedMood.emoji} {selectedMood.label}</h2>
+            <p>{selectedMood.note}</p>
+          </div>
+          <div className="mood-options" role="group" aria-label="기분 선택">
+            {moodOptions.map((mood) => (
+              <button
+                aria-pressed={selectedMood.label === mood.label}
+                className={selectedMood.label === mood.label ? "is-selected" : ""}
+                key={mood.label}
+                onClick={() => handleMoodSelect(mood)}
+                type="button"
+              >
+                <span aria-hidden="true">{mood.emoji}</span>
+                <small>{mood.label}</small>
+              </button>
+            ))}
+          </div>
+          <Link href="/diary">
+            <a className="mood-diary-link">
+              감정일기로 남기기
+              <ArrowRight size={17} aria-hidden="true" />
             </a>
           </Link>
         </section>

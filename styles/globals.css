@@ -534,6 +534,98 @@ input {
   font-weight: 900;
 }
 
+.mood-check {
+  display: grid;
+  gap: 16px;
+  margin: 0 0 22px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-clear);
+  box-shadow: 0 10px 24px rgba(38, 56, 50, 0.06);
+}
+
+.mood-check-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.mood-check-copy span {
+  color: var(--teal);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.mood-check-copy h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 23px;
+  line-height: 1.25;
+}
+
+.mood-check-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+
+.mood-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mood-options button {
+  display: grid;
+  min-height: 76px;
+  place-items: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.mood-options button:hover {
+  border-color: var(--teal-strong);
+  box-shadow: 0 10px 20px rgba(38, 56, 50, 0.09);
+  transform: translateY(-1px);
+}
+
+.mood-options button.is-selected {
+  border-color: var(--teal-strong);
+  background: var(--selected-panel);
+  box-shadow: inset 0 0 0 1px rgba(19, 116, 106, 0.18);
+}
+
+.mood-options span {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.mood-options small {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.mood-diary-link {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  color: var(--teal);
+  font-size: 14px;
+  font-weight: 900;
+}
+
 .section-heading {
   display: grid;
   gap: 5px;
@@ -2199,6 +2291,19 @@ input {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .mood-check {
+    grid-template-columns: minmax(220px, 0.75fr) minmax(0, 1.25fr);
+    align-items: center;
+  }
+
+  .mood-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .mood-diary-link {
+    grid-column: 1 / -1;
+  }
+
   .featured-path,
   .test-catalog-panel {
     grid-template-columns: 1fr auto;
@@ -2238,6 +2343,19 @@ input {
 @media (min-width: 980px) {
   .service-map {
     grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .mood-check {
+    grid-template-columns: minmax(230px, 0.58fr) minmax(0, 1.32fr) auto;
+  }
+
+  .mood-options {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .mood-diary-link {
+    grid-column: auto;
+    justify-self: end;
   }
 
   .admin-shell {

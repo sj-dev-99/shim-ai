@@ -269,7 +269,7 @@ export async function getPublicStats() {
 
   try {
     const response = await supabaseFetch(
-      "?select=id&event_type=eq.page_view&path=eq.%2Fresult",
+      "?select=id&event_type=eq.page_view&path=like.%2Fresult%25",
       {
         method: "HEAD",
         headers: {

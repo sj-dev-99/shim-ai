@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ArrowLeft, BookOpenText, BrainCircuit, CalendarDays, PenLine, Sparkles, Trash2 } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { disclaimer } from "../lib/data";
 
 type DiaryEmotion =
@@ -28,6 +28,7 @@ type DiaryEntry = {
 };
 
 const DIARY_STORAGE_KEY = "shim_ai_diary_entries";
+const DIARY_PREVIEW_MESSAGE = "오늘의 감정을 적으면 shim.ai가 한 줄로 마음을 정리해드릴게요.";
 
 const emotionOptions: Array<{ id: DiaryEmotion; label: string; tone: string }> = [
   { id: "good", label: "좋음", tone: "기분 좋은 장면이 남은 하루" },
@@ -169,11 +170,6 @@ export default function DiaryPage() {
     }
   }, [router.query.emotion]);
 
-  const previewComment = useMemo(() => {
-    if (!text.trim()) return "오늘의 감정을 적으면 shim.ai가 한 줄로 마음을 정리해드릴게요.";
-    return createDiaryComment(emotion, text);
-  }, [emotion, text]);
-
   function submitDiary(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!text.trim()) return;
@@ -272,7 +268,7 @@ export default function DiaryPage() {
 
             <aside className="diary-comment-preview" aria-label="shim.ai 코멘트 미리보기">
               <Sparkles size={17} aria-hidden="true" />
-              <p>{previewComment}</p>
+              <p>{DIARY_PREVIEW_MESSAGE}</p>
             </aside>
 
             <button className="primary-button diary-submit" disabled={!text.trim()} type="submit">

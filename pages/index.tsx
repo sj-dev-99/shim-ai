@@ -7,7 +7,6 @@ import {
   BookOpenText,
   BrainCircuit,
   ClipboardCheck,
-  Heart,
   HeartPulse,
   LineChart,
   MessageCircleHeart,
@@ -40,13 +39,6 @@ const services = [
     status: "OPEN"
   },
   {
-    name: "SHIM Talk",
-    description: "대화형 감정 정리와 자기이해 코칭",
-    href: "/talk",
-    icon: MessageCircleHeart,
-    status: "준비중"
-  },
-  {
     name: "SHIM Report",
     description: "지난 한 달 동안 내 감정이 어떻게 달라졌는지 AI가 분석해드립니다.",
     href: "/report",
@@ -58,6 +50,13 @@ const services = [
     description: "AI가 추천하는 나만의 회복 루틴",
     href: "/care",
     icon: HeartPulse,
+    status: "준비중"
+  },
+  {
+    name: "SHIM Talk",
+    description: "대화형 감정 정리와 자기이해 코칭",
+    href: "/talk",
+    icon: MessageCircleHeart,
     status: "준비중"
   }
 ];
@@ -329,21 +328,6 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
           })}
         </section>
 
-        <section className="trust-strip" aria-label="SHIM AI 운영 기준">
-          <div>
-            <strong>Beta v0.1.3</strong>
-            <span>실제 피드백 기반 개선 중</span>
-          </div>
-          <div>
-            <strong>4개</strong>
-            <span>심리검사 라인업 구성</span>
-          </div>
-          <div>
-            <strong>익명</strong>
-            <span>이름 없이 의견 제출</span>
-          </div>
-        </section>
-
         <section className="platform-grid" aria-label="SHIM AI 서비스 방향">
           {platformPoints.map((point) => {
             const Icon = point.icon;
@@ -412,12 +396,6 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
               <a className="primary-button">
                 검사 라인업 보기
                 <ArrowRight size={18} aria-hidden="true" />
-              </a>
-            </Link>
-            <Link href="/mind">
-              <a className="secondary-button">
-                바로 테스트 시작
-                <Heart size={18} aria-hidden="true" />
               </a>
             </Link>
           </div>

@@ -318,33 +318,6 @@ input {
   margin-top: 10px;
 }
 
-.trust-strip {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  margin: 4px 0 22px;
-}
-
-.trust-strip div {
-  display: grid;
-  gap: 4px;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel-clear);
-}
-
-.trust-strip strong {
-  color: var(--ink);
-  font-size: 18px;
-}
-
-.trust-strip span {
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 800;
-}
-
 .platform-grid {
   display: grid;
   gap: 12px;
@@ -953,9 +926,15 @@ input {
 }
 
 .test-catalog-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  display: grid;
+  justify-items: stretch;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.test-catalog-actions .primary-button {
+  width: 100%;
 }
 
 .progress-row {
@@ -2166,10 +2145,6 @@ input {
 @media (min-width: 480px) {
   .hero h1 {
     font-size: 56px;
-  }
-
-  .trust-strip {
-    grid-template-columns: repeat(3, 1fr);
   }
 
   .service-map {

@@ -1,11 +1,42 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ArrowLeft, BrainCircuit, RotateCcw, Send, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
+import { ArrowLeft, BrainCircuit, Copy, Download, Instagram, MessageCircle, RotateCcw, Send, Share2 } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { submitBetaEvent } from "../lib/beta";
 import { disclaimer, getResultByScore, TEST_NAME } from "../lib/data";
 import { readTestProfile, TestProfile } from "../lib/testProfile";
+
+const resultVisuals = {
+  observer: [
+    { label: "자기이해", value: 4 },
+    { label: "감정관찰", value: 5 },
+    { label: "실행력", value: 3 }
+  ],
+  balancer: [
+    { label: "자기이해", value: 5 },
+    { label: "균형감", value: 5 },
+    { label: "회복력", value: 4 }
+  ],
+  starter: [
+    { label: "문제해결", value: 5 },
+    { label: "실행력", value: 5 },
+    { label: "회복력", value: 4 }
+  ],
+  driver: [
+    { label: "자기이해", value: 5 },
+    { label: "문제해결", value: 5 },
+    { label: "회복력", value: 5 }
+  ]
+};
+
+function stars(value: number) {
+  return "★".repeat(value) + "☆".repeat(5 - value);
+}
+
+function escapeSvgText(value: string) {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 
 export default function ResultPage() {
   const router = useRouter();
@@ -17,6 +48,8 @@ export default function ResultPage() {
   const [opinion, setOpinion] = useState("");
   const [opinionStatus, setOpinionStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [profile, setProfile] = useState<TestProfile | null>(null);
+  const [shareStatus, setShareStatus] = useState("");
+  const visualScores = resultVisuals[result.id as keyof typeof resultVisuals] || resultVisuals.balancer;
 
   useEffect(() => {
     setProfile(readTestProfile());
@@ -51,6 +84,71 @@ export default function ResultPage() {
     }
 
     setOpinionStatus("error");
+  }
+
+  function shareText() {
+    return `${profile?.nickname ? `${profile.nickname}님의 ` : ""}${TEST_NAME} 결과는 '${result.label}'입니다. ${result.coreMessage}`;
+  }
+
+  async function shareResult() {
+    const url = window.location.href;
+    const text = shareText();
+
+    if (navigator.share) {
+      await navigator.share({ title: TEST_NAME, text, url });
+      setShareStatus("공유창을 열었습니다.");
+      return;
+    }
+
+    await navigator.clipboard.writeText(`${text}\n${url}`);
+    setShareStatus("결과 링크를 복사했습니다.");
+  }
+
+  async function copyResultLink() {
+    await navigator.clipboard.writeText(window.location.href);
+    setShareStatus("링크를 복사했습니다.");
+  }
+
+  function saveResultImage() {
+    const title = escapeSvgText(`${TEST_NAME} 결과`);
+    const owner = escapeSvgText(profile?.nickname ? `${profile.nickname}님의 결과` : "나의 결과");
+    const label = escapeSvgText(result.label);
+    const message = escapeSvgText(result.coreMessage);
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+        <rect width="1080" height="1080" fill="#f7fbf8"/>
+        <rect x="90" y="90" width="900" height="900" rx="42" fill="#ffffff" stroke="#dbe7e2"/>
+        <text x="140" y="180" fill="#13746a" font-size="34" font-family="Arial, sans-serif" font-weight="700">shim.ai</text>
+        <text x="140" y="260" fill="#111827" font-size="42" font-family="Arial, sans-serif" font-weight="700">${title}</text>
+        <text x="140" y="335" fill="#b84d3d" font-size="30" font-family="Arial, sans-serif" font-weight="700">${owner}</text>
+        <text x="140" y="430" fill="#111827" font-size="58" font-family="Arial, sans-serif" font-weight="700">${label}</text>
+        <foreignObject x="140" y="485" width="800" height="220">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="color:#4f5f5a;font-size:30px;line-height:1.55;font-family:Arial,sans-serif;font-weight:700;">${message}</div>
+        </foreignObject>
+        <text x="140" y="790" fill="#13746a" font-size="32" font-family="Arial, sans-serif" font-weight="700">자기이해 ${stars(visualScores[0].value)}</text>
+        <text x="140" y="850" fill="#13746a" font-size="32" font-family="Arial, sans-serif" font-weight="700">문제해결 ${stars(visualScores[1].value)}</text>
+        <text x="140" y="910" fill="#13746a" font-size="32" font-family="Arial, sans-serif" font-weight="700">회복력 ${stars(visualScores[2].value)}</text>
+      </svg>
+    `;
+    const blob = new Blob([svg], { type: "image/svg+xml" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "shim-ai-result.svg";
+    link.click();
+    URL.revokeObjectURL(link.href);
+    setShareStatus("결과 이미지를 저장했습니다.");
+  }
+
+  async function openSocialShare(target: "kakao" | "instagram") {
+    await navigator.clipboard.writeText(`${shareText()}\n${window.location.href}`);
+    if (target === "kakao") {
+      window.open("https://sharer.kakao.com/talk/friends/picker/link", "_blank", "noopener,noreferrer");
+      setShareStatus("공유 문구를 복사하고 카카오 공유 화면을 열었습니다.");
+      return;
+    }
+
+    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+    setShareStatus("공유 문구를 복사했습니다. 인스타그램에 붙여넣어 공유해보세요.");
   }
 
   return (
@@ -94,6 +192,15 @@ export default function ResultPage() {
               <strong>심리적 경향</strong>
               <p>{result.description}</p>
             </article>
+          </div>
+
+          <div className="result-visual-panel" aria-label="결과 성향 시각화">
+            {visualScores.map((item) => (
+              <div className="result-star-row" key={item.label}>
+                <span>{stars(item.value)}</span>
+                <strong>{item.label}</strong>
+              </div>
+            ))}
           </div>
 
           <div className="result-section">
@@ -158,8 +265,7 @@ export default function ResultPage() {
                 onClick={() => rate("up")}
                 type="button"
               >
-                <ThumbsUp size={18} aria-hidden="true" />
-                좋아요
+                👍 도움이 되었어요
               </button>
               <button
                 aria-pressed={selectedRating === "down"}
@@ -167,8 +273,7 @@ export default function ResultPage() {
                 onClick={() => rate("down")}
                 type="button"
               >
-                <ThumbsDown size={18} aria-hidden="true" />
-                아쉬워요
+                👎 조금 아쉬웠어요
               </button>
             </div>
           </section>
@@ -179,7 +284,7 @@ export default function ResultPage() {
               <textarea
                 className="beta-textarea"
                 onChange={(event) => setOpinion(event.target.value)}
-                placeholder="문항, 결과 설명, 디자인에서 개선되면 좋을 점을 알려주세요."
+                placeholder="어떤 점이 가장 좋았나요? 아쉬웠던 점이나 추가되었으면 하는 기능이 있다면 자유롭게 알려주세요."
                 rows={4}
                 value={opinion}
               />
@@ -190,6 +295,36 @@ export default function ResultPage() {
               {opinionStatus === "sent" ? <p className="beta-status">의견이 전송되었습니다.</p> : null}
               {opinionStatus === "error" ? <p className="beta-status">전송에 실패했습니다. 잠시 후 다시 시도해주세요.</p> : null}
             </form>
+          </section>
+
+          <section className="result-share-panel" aria-label="결과 공유">
+            <div>
+              <h2>결과 공유</h2>
+              <p>나의 결과를 저장하거나 친구에게 가볍게 공유해보세요.</p>
+            </div>
+            <div className="share-action-grid">
+              <button className="secondary-button" onClick={shareResult} type="button">
+                <Share2 size={17} aria-hidden="true" />
+                결과 공유하기
+              </button>
+              <button className="secondary-button" onClick={() => openSocialShare("kakao")} type="button">
+                <MessageCircle size={17} aria-hidden="true" />
+                카카오
+              </button>
+              <button className="secondary-button" onClick={copyResultLink} type="button">
+                <Copy size={17} aria-hidden="true" />
+                링크 복사
+              </button>
+              <button className="secondary-button" onClick={saveResultImage} type="button">
+                <Download size={17} aria-hidden="true" />
+                이미지 저장
+              </button>
+              <button className="secondary-button" onClick={() => openSocialShare("instagram")} type="button">
+                <Instagram size={17} aria-hidden="true" />
+                인스타 스토리
+              </button>
+            </div>
+            {shareStatus ? <p className="share-status">{shareStatus}</p> : null}
           </section>
 
           <div className="actions">

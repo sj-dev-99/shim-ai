@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   BarChart3,
@@ -82,8 +83,55 @@ const platformPoints = [
   }
 ];
 
+const dailyQuotes = [
+  "오늘의 작은 숨 고르기가 내일의 나를 조금 더 편안하게 합니다.",
+  "괜찮아지는 일은 늘 조용히, 그러나 분명히 시작됩니다.",
+  "마음이 느린 날에도 당신은 충분히 잘 지나가고 있습니다.",
+  "잠시 멈추는 것도 나를 지키는 하나의 방법입니다.",
+  "오늘의 나를 다그치기보다 살짝 안아주는 쪽을 선택해보세요.",
+  "흔들리는 마음에도 방향을 잃지 않는 힘이 남아 있습니다.",
+  "완벽하지 않아도 괜찮습니다. 지금의 속도도 당신의 속도입니다.",
+  "마음이 무거운 날에는 작은 친절 하나가 충분한 시작입니다.",
+  "나를 이해하려는 마음은 이미 회복의 첫 문장입니다.",
+  "오늘 하루를 버텨낸 것만으로도 마음은 제 몫을 해냈습니다."
+];
+
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function getDailyQuote(date = new Date()) {
+  const kstDate = new Date(date.getTime() + KST_OFFSET_MS);
+  const year = kstDate.getUTCFullYear();
+  const month = kstDate.getUTCMonth();
+  const day = kstDate.getUTCDate();
+  const dayIndex = Math.floor((Date.UTC(year, month, day) - Date.UTC(2026, 0, 1)) / DAY_MS);
+  return dailyQuotes[Math.abs(dayIndex) % dailyQuotes.length];
+}
+
+function getMsUntilNextKstMidnight(date = new Date()) {
+  const kstDate = new Date(date.getTime() + KST_OFFSET_MS);
+  const year = kstDate.getUTCFullYear();
+  const month = kstDate.getUTCMonth();
+  const day = kstDate.getUTCDate();
+  const nextKstMidnightUtc = Date.UTC(year, month, day + 1) - KST_OFFSET_MS;
+  return Math.max(nextKstMidnightUtc - date.getTime(), 1000);
+}
+
 export default function HomePage({ theme, toggleTheme }: HomePageProps) {
   const isDark = theme === "dark";
+  const [dailyQuote, setDailyQuote] = useState(dailyQuotes[0]);
+
+  useEffect(() => {
+    let timeoutId: number;
+
+    function refreshQuote() {
+      setDailyQuote(getDailyQuote());
+      timeoutId = window.setTimeout(refreshQuote, getMsUntilNextKstMidnight());
+    }
+
+    refreshQuote();
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   return (
     <>
@@ -121,6 +169,9 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
               AI 심리검사 기반 자기이해 플랫폼
             </span>
             <h1>나를 설명하는 언어를 더 정교하게.</h1>
+            <p className="daily-quote" aria-label="오늘의 글귀">
+              {dailyQuote}
+            </p>
             <p>
               SHIM AI는 감정, 관계, 사고 패턴을 검사하고 해석해 스스로를 더 잘 이해하도록 돕는
               베타 서비스입니다. 지금은 심리검사를 중심으로 시작하고, 대화와 리포트, 관리 루틴으로

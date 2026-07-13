@@ -235,6 +235,23 @@ input {
   line-height: 1.65;
 }
 
+.daily-quote {
+  display: inline-flex;
+  width: fit-content;
+  max-width: min(100%, 640px);
+  align-items: center;
+  margin: 0 0 12px;
+  padding: 9px 12px;
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  background: var(--panel-clear);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

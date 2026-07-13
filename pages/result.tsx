@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ArrowLeft, BrainCircuit, Copy, Download, Instagram, MessageCircle, RotateCcw, Send, Share2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, BrainCircuit, Copy, Download, RotateCcw, Send, Share2 } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { submitBetaEvent } from "../lib/beta";
 import { disclaimer, getResultByScore, TEST_NAME } from "../lib/data";
@@ -137,18 +137,6 @@ export default function ResultPage() {
     link.click();
     URL.revokeObjectURL(link.href);
     setShareStatus("결과 이미지를 저장했습니다.");
-  }
-
-  async function openSocialShare(target: "kakao" | "instagram") {
-    await navigator.clipboard.writeText(`${shareText()}\n${window.location.href}`);
-    if (target === "kakao") {
-      window.open("https://sharer.kakao.com/talk/friends/picker/link", "_blank", "noopener,noreferrer");
-      setShareStatus("공유 문구를 복사하고 카카오 공유 화면을 열었습니다.");
-      return;
-    }
-
-    window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
-    setShareStatus("공유 문구를 복사했습니다. 인스타그램에 붙여넣어 공유해보세요.");
   }
 
   return (
@@ -307,10 +295,6 @@ export default function ResultPage() {
                 <Share2 size={17} aria-hidden="true" />
                 결과 공유하기
               </button>
-              <button className="secondary-button" onClick={() => openSocialShare("kakao")} type="button">
-                <MessageCircle size={17} aria-hidden="true" />
-                카카오
-              </button>
               <button className="secondary-button" onClick={copyResultLink} type="button">
                 <Copy size={17} aria-hidden="true" />
                 링크 복사
@@ -318,10 +302,6 @@ export default function ResultPage() {
               <button className="secondary-button" onClick={saveResultImage} type="button">
                 <Download size={17} aria-hidden="true" />
                 이미지 저장
-              </button>
-              <button className="secondary-button" onClick={() => openSocialShare("instagram")} type="button">
-                <Instagram size={17} aria-hidden="true" />
-                인스타 스토리
               </button>
             </div>
             {shareStatus ? <p className="share-status">{shareStatus}</p> : null}
@@ -337,7 +317,7 @@ export default function ResultPage() {
             <Link href="/">
               <a className="secondary-button">
                 다른 기능 보기
-                <Share2 size={18} aria-hidden="true" />
+                <ArrowRight size={18} aria-hidden="true" />
               </a>
             </Link>
           </div>

@@ -122,18 +122,18 @@ const dailyQuotes = [
 ];
 
 const moodOptions = [
-  { emoji: "😊", label: "좋아요", note: "오늘의 좋은 감정을 조금 더 오래 머물게 해보세요.", prompt: "오늘 무엇이 나를 웃게 했나요?" },
-  { emoji: "😌", label: "평온해요", note: "차분한 마음을 기록하면 나만의 안정 패턴이 보입니다.", prompt: "오늘 마음이 편안했던 순간은 언제였나요?" },
-  { emoji: "🥰", label: "따뜻해요", note: "마음이 부드러운 날의 이유를 짧게 남겨보세요.", prompt: "오늘 누구에게, 혹은 무엇에게 따뜻함을 느꼈나요?" },
-  { emoji: "🤩", label: "설레요", note: "기대되는 마음은 나를 움직이게 하는 좋은 신호입니다.", prompt: "오늘 어떤 기대가 마음을 움직였나요?" },
-  { emoji: "🙂", label: "괜찮아요", note: "아주 특별하지 않아도 충분히 괜찮은 하루가 있습니다.", prompt: "오늘 괜찮다고 느낀 작은 이유는 무엇인가요?" },
-  { emoji: "😐", label: "무덤덤해요", note: "감정이 선명하지 않은 날도 그대로 기록할 수 있어요.", prompt: "오늘 무슨 일이 있었나요?" },
-  { emoji: "😕", label: "복잡해요", note: "엉킨 마음은 적어보는 순간 조금씩 정리되기 시작합니다.", prompt: "오늘 마음을 복잡하게 만든 일은 무엇인가요?" },
-  { emoji: "😟", label: "불안해요", note: "불안의 크기보다 지금 필요한 안정을 먼저 살펴보세요.", prompt: "오늘 가장 신경 쓰였던 일은 무엇인가요?" },
-  { emoji: "😢", label: "슬퍼요", note: "슬픈 마음도 이름을 붙이면 혼자 견디는 느낌이 줄어듭니다.", prompt: "오늘 마음이 내려앉았던 순간은 언제였나요?" },
-  { emoji: "😡", label: "화나요", note: "화가 난 이유를 안전하게 적어두면 마음의 경계가 보입니다.", prompt: "오늘 어떤 일이 내 마음의 선을 넘었나요?" },
-  { emoji: "😴", label: "피곤해요", note: "지친 날에는 회복을 위한 작은 선택 하나면 충분합니다.", prompt: "오늘 나를 가장 지치게 한 것은 무엇인가요?" },
-  { emoji: "🥺", label: "외로워요", note: "외로움도 오늘의 중요한 감정입니다. 조용히 들어봐도 괜찮아요.", prompt: "오늘 어떤 순간에 혼자라고 느꼈나요?" }
+  { emoji: "😊", label: "좋아요", diaryId: "good", note: "오늘의 좋은 감정을 조금 더 오래 머물게 해보세요.", prompt: "오늘 무엇이 나를 웃게 했나요?" },
+  { emoji: "😌", label: "평온해요", diaryId: "calm", note: "차분한 마음을 기록하면 나만의 안정 패턴이 보입니다.", prompt: "오늘 마음이 편안했던 순간은 언제였나요?" },
+  { emoji: "🥰", label: "따뜻해요", diaryId: "warm", note: "마음이 부드러운 날의 이유를 짧게 남겨보세요.", prompt: "오늘 누구에게, 혹은 무엇에게 따뜻함을 느꼈나요?" },
+  { emoji: "🤩", label: "설레요", diaryId: "excited", note: "기대되는 마음은 나를 움직이게 하는 좋은 신호입니다.", prompt: "오늘 어떤 기대가 마음을 움직였나요?" },
+  { emoji: "🙂", label: "괜찮아요", diaryId: "okay", note: "아주 특별하지 않아도 충분히 괜찮은 하루가 있습니다.", prompt: "오늘 괜찮다고 느낀 작은 이유는 무엇인가요?" },
+  { emoji: "😐", label: "무덤덤해요", diaryId: "neutral", note: "감정이 선명하지 않은 날도 그대로 기록할 수 있어요.", prompt: "오늘 무슨 일이 있었나요?" },
+  { emoji: "😕", label: "복잡해요", diaryId: "mixed", note: "엉킨 마음은 적어보는 순간 조금씩 정리되기 시작합니다.", prompt: "오늘 마음을 복잡하게 만든 일은 무엇인가요?" },
+  { emoji: "😟", label: "불안해요", diaryId: "anxious", note: "불안의 크기보다 지금 필요한 안정을 먼저 살펴보세요.", prompt: "오늘 가장 신경 쓰였던 일은 무엇인가요?" },
+  { emoji: "😢", label: "슬퍼요", diaryId: "sad", note: "슬픈 마음도 이름을 붙이면 혼자 견디는 느낌이 줄어듭니다.", prompt: "오늘 마음이 내려앉았던 순간은 언제였나요?" },
+  { emoji: "😡", label: "화나요", diaryId: "angry", note: "화가 난 이유를 안전하게 적어두면 마음의 경계가 보입니다.", prompt: "오늘 어떤 일이 내 마음의 선을 넘었나요?" },
+  { emoji: "😴", label: "피곤해요", diaryId: "tired", note: "지친 날에는 회복을 위한 작은 선택 하나면 충분합니다.", prompt: "오늘 나를 가장 지치게 한 것은 무엇인가요?" },
+  { emoji: "🥺", label: "외로워요", diaryId: "lonely", note: "외로움도 오늘의 중요한 감정입니다. 조용히 들어봐도 괜찮아요.", prompt: "오늘 어떤 순간에 혼자라고 느꼈나요?" }
 ];
 
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
@@ -296,7 +296,7 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
               </button>
             ))}
           </div>
-          <Link href="/diary">
+          <Link href={`/diary?emotion=${selectedMood.diaryId}`}>
             <a className="mood-diary-link">
               SHIM Diary로 남기기
               <ArrowRight size={17} aria-hidden="true" />

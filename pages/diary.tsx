@@ -1,10 +1,23 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { ArrowLeft, BookOpenText, BrainCircuit, CalendarDays, PenLine, Sparkles, Trash2 } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { disclaimer } from "../lib/data";
 
-type DiaryEmotion = "calm" | "heavy" | "anxious" | "tired" | "grateful" | "bright";
+type DiaryEmotion =
+  | "good"
+  | "calm"
+  | "warm"
+  | "excited"
+  | "okay"
+  | "neutral"
+  | "mixed"
+  | "anxious"
+  | "sad"
+  | "angry"
+  | "tired"
+  | "lonely";
 
 type DiaryEntry = {
   id: string;
@@ -17,40 +30,78 @@ type DiaryEntry = {
 const DIARY_STORAGE_KEY = "shim_ai_diary_entries";
 
 const emotionOptions: Array<{ id: DiaryEmotion; label: string; tone: string }> = [
-  { id: "calm", label: "차분함", tone: "마음이 비교적 안정된 하루" },
-  { id: "heavy", label: "무거움", tone: "마음이 조금 가라앉은 하루" },
+  { id: "good", label: "좋음", tone: "기분 좋은 장면이 남은 하루" },
+  { id: "calm", label: "평온함", tone: "마음이 비교적 안정된 하루" },
+  { id: "warm", label: "따뜻함", tone: "작은 온기와 다정함이 남은 하루" },
+  { id: "excited", label: "설렘", tone: "기대와 활력이 올라온 하루" },
+  { id: "okay", label: "괜찮음", tone: "조금은 나아진 하루" },
+  { id: "neutral", label: "무덤덤함", tone: "감정이 크게 흔들리지 않은 하루" },
+  { id: "mixed", label: "복잡함", tone: "여러 생각과 감정이 엉킨 하루" },
   { id: "anxious", label: "불안함", tone: "생각이 많고 긴장된 하루" },
+  { id: "sad", label: "슬픔", tone: "마음이 조금 가라앉은 하루" },
+  { id: "angry", label: "화남", tone: "마음의 경계가 건드려진 하루" },
   { id: "tired", label: "지침", tone: "에너지가 많이 쓰인 하루" },
-  { id: "grateful", label: "고마움", tone: "작은 온기가 남은 하루" },
-  { id: "bright", label: "괜찮음", tone: "조금은 나아진 하루" }
+  { id: "lonely", label: "외로움", tone: "혼자라는 감각이 커진 하루" }
 ];
 
 const commentByEmotion: Record<DiaryEmotion, string[]> = {
+  good: [
+    "좋았던 감정을 기록하는 일은 나에게 맞는 회복 방식을 발견하는 단서가 됩니다.",
+    "오늘의 미소가 작더라도 마음은 그 장면을 분명히 기억합니다."
+  ],
   calm: [
     "오늘의 차분함을 잘 기억해두면 흔들리는 날에도 돌아올 기준점이 됩니다.",
     "큰 사건이 없는 평온한 하루도 마음에게는 충분히 좋은 회복입니다."
   ],
-  heavy: [
-    "마음이 무거운 날에는 잘해내는 것보다 무게를 알아차리는 일이 먼저입니다.",
-    "오늘의 무거움은 당신이 약해서가 아니라 많이 버티고 있다는 신호일 수 있습니다."
+  warm: [
+    "따뜻함을 알아차린 마음은 오늘의 작은 빛을 놓치지 않은 마음입니다.",
+    "작은 온기 하나가 하루 전체를 조금 더 부드럽게 만들어줄 수 있습니다."
+  ],
+  excited: [
+    "설렘은 마음이 앞으로 움직이고 있다는 신호입니다. 그 기대를 천천히 따라가도 괜찮습니다.",
+    "오늘의 기대감을 기록해두면 나를 움직이게 하는 방향이 조금 더 선명해집니다."
+  ],
+  okay: [
+    "괜찮았던 순간을 적어두면 흔들리는 날에도 돌아볼 수 있는 작은 기준이 됩니다.",
+    "오늘의 괜찮음이 아주 작더라도, 마음은 그 신호를 분명히 기억합니다."
+  ],
+  neutral: [
+    "무덤덤한 날도 마음의 중요한 기록입니다. 선명하지 않은 감정도 그대로 괜찮습니다.",
+    "특별한 감정이 없어도 하루는 지나갔고, 그 사실만으로도 충분한 기록이 됩니다."
+  ],
+  mixed: [
+    "복잡한 마음은 한 번에 풀려고 하기보다, 지금 가장 큰 감정 하나부터 적어봐도 좋습니다.",
+    "엉킨 감정을 말로 꺼내는 순간 마음은 조금씩 정리될 준비를 시작합니다."
   ],
   anxious: [
     "불안은 미래를 준비하려는 마음의 신호이지만, 지금의 나를 너무 몰아붙이지 않아도 됩니다.",
     "생각이 많았던 하루라면 결론보다 호흡을 먼저 돌려주는 것이 좋습니다."
   ],
+  sad: [
+    "슬픈 마음을 알아차리는 것만으로도 오늘의 나를 혼자 두지 않는 일이 됩니다.",
+    "마음이 가라앉은 날에는 이유를 다 설명하지 못해도 괜찮습니다."
+  ],
+  angry: [
+    "화는 내 마음의 경계가 건드려졌다는 신호일 수 있습니다. 그 경계를 천천히 살펴봐도 좋습니다.",
+    "오늘의 화를 안전하게 적어두면 내가 지키고 싶은 것이 무엇인지 보일 수 있습니다."
+  ],
   tired: [
     "지친 하루에는 더 해내는 힘보다 멈출 수 있는 용기가 더 필요합니다.",
     "오늘의 피로를 인정하는 것만으로도 내일의 에너지를 지키는 선택이 됩니다."
   ],
-  grateful: [
-    "고마움을 알아차린 마음은 이미 오늘의 작은 빛을 놓치지 않은 마음입니다.",
-    "작은 고마움 하나가 하루 전체를 조금 더 부드럽게 만들어줄 수 있습니다."
-  ],
-  bright: [
-    "괜찮았던 순간을 기록하는 일은 나에게 맞는 회복 방식을 발견하는 단서가 됩니다.",
-    "오늘의 괜찮음이 작더라도, 마음은 그 작은 신호를 분명히 기억합니다."
+  lonely: [
+    "외로움도 오늘의 중요한 감정입니다. 그 마음을 적어두는 일은 나에게 말을 걸어주는 일과 같습니다.",
+    "혼자라고 느낀 순간을 기록하면, 내가 필요로 하는 연결의 모양이 조금씩 보입니다."
   ]
 };
+
+function isDiaryEmotion(value: unknown): value is DiaryEmotion {
+  return typeof value === "string" && emotionOptions.some((option) => option.id === value);
+}
+
+function getEmotionLabel(value: string) {
+  return emotionOptions.find((item) => item.id === value)?.label || "감정 기록";
+}
 
 function readDiaryEntries() {
   if (typeof window === "undefined") return [];
@@ -100,15 +151,23 @@ function formatDate(value: string) {
 }
 
 export default function DiaryPage() {
+  const router = useRouter();
   const [emotion, setEmotion] = useState<DiaryEmotion>("calm");
   const [text, setText] = useState("");
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
-  const selectedEmotion = emotionOptions.find((item) => item.id === emotion) || emotionOptions[0];
   const latestEntry = entries[0];
 
   useEffect(() => {
     setEntries(readDiaryEntries());
   }, []);
+
+  useEffect(() => {
+    const rawEmotion = Array.isArray(router.query.emotion) ? router.query.emotion[0] : router.query.emotion;
+
+    if (isDiaryEmotion(rawEmotion)) {
+      setEmotion(rawEmotion);
+    }
+  }, [router.query.emotion]);
 
   const previewComment = useMemo(() => {
     if (!text.trim()) return "오늘의 감정을 적으면 shim.ai가 한 줄로 마음을 정리해드릴게요.";
@@ -234,7 +293,7 @@ export default function DiaryPage() {
                   <CalendarDays size={15} aria-hidden="true" />
                   {formatDate(latestEntry.createdAt)}
                 </span>
-                <strong>{emotionOptions.find((item) => item.id === latestEntry.emotion)?.label}</strong>
+                <strong>{getEmotionLabel(latestEntry.emotion)}</strong>
                 <p>{latestEntry.comment}</p>
               </div>
             ) : (
@@ -249,7 +308,7 @@ export default function DiaryPage() {
                 <article className="diary-entry-card" key={entry.id}>
                   <div>
                     <span>{formatDate(entry.createdAt)}</span>
-                    <strong>{emotionOptions.find((item) => item.id === entry.emotion)?.label}</strong>
+                    <strong>{getEmotionLabel(entry.emotion)}</strong>
                   </div>
                   <p>{entry.text}</p>
                   <blockquote>{entry.comment}</blockquote>

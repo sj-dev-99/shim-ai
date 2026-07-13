@@ -190,9 +190,10 @@ input {
   gap: 8px;
 }
 
-.hero-test-list span {
+.hero-test-list span,
+.hero-test-list a {
   display: grid;
-  grid-template-columns: 36px 1fr;
+  grid-template-columns: 36px 1fr auto;
   align-items: center;
   gap: 10px;
   min-height: 38px;
@@ -207,6 +208,22 @@ input {
 .hero-test-list b {
   color: var(--teal);
   font-size: 12px;
+}
+
+.hero-test-list em {
+  padding: 4px 7px;
+  border-radius: 8px;
+  background: var(--selected-panel);
+  color: var(--teal);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.test-status-group + .test-status-group .hero-test-list em {
+  background: rgba(184, 77, 61, 0.1);
+  color: var(--coral);
 }
 
 .eyebrow {
@@ -667,6 +684,22 @@ input {
 .hero-test-list.compact {
   max-width: 620px;
   margin-top: 14px;
+}
+
+.test-status-groups {
+  display: grid;
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.test-status-group {
+  display: grid;
+  gap: 6px;
+}
+
+.test-status-group > strong {
+  color: var(--ink);
+  font-size: 14px;
 }
 
 .test-catalog-actions {

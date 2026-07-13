@@ -58,11 +58,30 @@ const services = [
 ];
 
 const featuredTests = [
-  "AI 감정·회복 유형 테스트",
-  "연애유형·이상형 분석",
-  "대인관계 분석",
-  "고지능 우울증 검사"
+  {
+    name: "AI 감정·회복 유형 테스트",
+    status: "오픈중",
+    href: "/mind"
+  },
+  {
+    name: "연애유형·이상형 분석",
+    status: "오픈중",
+    href: "/love-type"
+  },
+  {
+    name: "대인관계 분석",
+    status: "준비중",
+    href: "/relationship-test"
+  },
+  {
+    name: "고지능 우울증 검사",
+    status: "준비중",
+    href: "/high-functioning-depression"
+  }
 ];
+
+const openTests = featuredTests.filter((test) => test.status === "오픈중");
+const plannedTests = featuredTests.filter((test) => test.status === "준비중");
 
 const platformPoints = [
   {
@@ -244,13 +263,35 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
               감정·회복 테스트와 연애유형·이상형 분석은 지금 바로 이용할 수 있고,
               대인관계와 고지능 우울증 검사는 순차적으로 공개할 예정입니다.
             </p>
-            <div className="hero-test-list compact">
-              {featuredTests.map((test, index) => (
-                <span key={test}>
-                  <b>{String(index + 1).padStart(2, "0")}</b>
-                  {test}
-                </span>
-              ))}
+            <div className="test-status-groups">
+              <div className="test-status-group">
+                <strong>오픈중</strong>
+                <div className="hero-test-list compact">
+                  {openTests.map((test, index) => (
+                    <Link href={test.href} key={test.name}>
+                      <a>
+                        <b>{String(index + 1).padStart(2, "0")}</b>
+                        <span>{test.name}</span>
+                        <em>{test.status}</em>
+                      </a>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              <div className="test-status-group">
+                <strong>준비중</strong>
+                <div className="hero-test-list compact">
+                  {plannedTests.map((test, index) => (
+                    <Link href={test.href} key={test.name}>
+                      <a>
+                        <b>{String(index + 1 + openTests.length).padStart(2, "0")}</b>
+                        <span>{test.name}</span>
+                        <em>{test.status}</em>
+                      </a>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
           <div className="test-catalog-actions">

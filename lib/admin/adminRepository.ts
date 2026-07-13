@@ -260,6 +260,36 @@ export async function getAdminData(): Promise<AdminData> {
   }
 }
 
+export async function getPublicStats() {
+  if (!isLiveStorageConfigured()) {
+    return {
+      recommendedParticipationCount: null
+    };
+  }
+
+  try {
+    const response = await supabaseFetch(
+      "?select=id&event_type=eq.page_view&path=eq.%2Fresult",
+      {
+        method: "HEAD",
+        headers: {
+          Prefer: "count=exact"
+        }
+      }
+    );
+    const count = response ? Number(response.headers.get("content-range")?.split("/")?.[1]) : NaN;
+
+    return {
+      recommendedParticipationCount: Number.isFinite(count) ? count : null
+    };
+  } catch (error) {
+    console.error("[public-stats-error]", error);
+    return {
+      recommendedParticipationCount: null
+    };
+  }
+}
+
 export async function updateFeedbackRecord(input: UpdateRecordInput) {
   return updateAdminRecord(input);
 }

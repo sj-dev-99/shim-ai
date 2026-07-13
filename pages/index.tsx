@@ -29,31 +29,36 @@ const services = [
     name: "SHIM Test",
     description: "감정, 관계, 사고 패턴을 다루는 AI 심리검사 라인업",
     href: "/shim-test",
-    icon: ClipboardCheck
+    icon: ClipboardCheck,
+    status: "OPEN"
   },
   {
     name: "SHIM Talk",
     description: "대화형 감정 정리와 자기이해 코칭",
     href: "/talk",
-    icon: MessageCircleHeart
+    icon: MessageCircleHeart,
+    status: "준비중"
   },
   {
     name: "SHIM Diary",
-    description: "감정일기 기록과 shim.ai 한줄 코멘트",
+    description: "오늘의 감정을 기록하면 AI가 작은 위로와 한줄 코멘트를 남겨드립니다.",
     href: "/diary",
-    icon: BookOpenText
+    icon: BookOpenText,
+    status: "OPEN"
   },
   {
     name: "SHIM Report",
-    description: "주간·월간 변화 리포트와 회복 신호 분석",
+    description: "지난 한 달 동안 내 감정이 어떻게 달라졌는지 AI가 분석해드립니다.",
     href: "/report",
-    icon: BarChart3
+    icon: BarChart3,
+    status: "준비중"
   },
   {
     name: "SHIM Care",
-    description: "개인 패턴에 맞춘 감정 관리 루틴",
+    description: "AI가 추천하는 나만의 회복 루틴",
     href: "/care",
-    icon: HeartPulse
+    icon: HeartPulse,
+    status: "준비중"
   }
 ];
 
@@ -71,12 +76,14 @@ const featuredTests = [
   {
     name: "대인관계 분석",
     status: "준비중",
-    href: "/relationship-test"
+    href: "/relationship-test",
+    release: "출시 예정 2026.07"
   },
   {
     name: "고지능 우울증 검사",
     status: "준비중",
-    href: "/high-functioning-depression"
+    href: "/high-functioning-depression",
+    release: "출시 예정 2026.08"
   }
 ];
 
@@ -138,6 +145,7 @@ function getMsUntilNextKstMidnight(date = new Date()) {
 export default function HomePage({ theme, toggleTheme }: HomePageProps) {
   const isDark = theme === "dark";
   const [dailyQuote, setDailyQuote] = useState(dailyQuotes[0]);
+  const [recommendedCount, setRecommendedCount] = useState<number | null>(null);
 
   useEffect(() => {
     let timeoutId: number;
@@ -149,6 +157,25 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
 
     refreshQuote();
     return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetch("/api/public-stats")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { recommendedParticipationCount?: number | null } | null) => {
+        if (mounted && typeof data?.recommendedParticipationCount === "number") {
+          setRecommendedCount(data.recommendedParticipationCount);
+        }
+      })
+      .catch(() => {
+        if (mounted) setRecommendedCount(null);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return (
@@ -186,16 +213,36 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
               <Sparkles size={15} aria-hidden="true" />
               AI 심리검사 기반 자기이해 플랫폼
             </span>
-            <h1>나를 설명하는 언어를 더 정교하게.</h1>
+            <h1>AI와 함께 나를 더 정확하게 이해하세요.</h1>
             <p className="daily-quote" aria-label="오늘의 글귀">
               {dailyQuote}
             </p>
             <p>
-              SHIM AI는 감정, 관계, 사고 패턴을 검사하고 해석해 스스로를 더 잘 이해하도록 돕는
-              베타 서비스입니다. 지금은 심리검사를 중심으로 시작하고, 대화와 리포트, 관리 루틴으로
-              확장하고 있습니다.
+              AI 심리테스트와 감정기록을 통해 나를 이해하고 성장하는 자기이해 플랫폼입니다.
+              오늘의 감정부터 관계 패턴까지 쉽게 기록하고 해석해보세요.
             </p>
           </div>
+        </section>
+
+        <section className="today-recommendation" aria-label="오늘의 추천">
+          <div>
+            <span className="recommendation-kicker">오늘의 추천</span>
+            <h2>감정·회복 유형 테스트</h2>
+            <p>지금 내 감정 조절 패턴과 회복 방식을 12문항으로 확인해보세요.</p>
+            <div className="recommendation-meta" aria-label="추천 테스트 정보">
+              <span>3분</span>
+              <span>★★★★★</span>
+              <span>
+                {recommendedCount === null ? "참여 수 집계 중" : `${recommendedCount.toLocaleString("ko-KR")}명이 참여했습니다.`}
+              </span>
+            </div>
+          </div>
+          <Link href="/mind">
+            <a className="primary-button">
+              테스트 시작
+              <ArrowRight size={18} aria-hidden="true" />
+            </a>
+          </Link>
         </section>
 
         <section className="service-map service-map-priority" aria-label="SHIM AI 서비스 선택">
@@ -212,6 +259,7 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
                     <Icon size={22} aria-hidden="true" />
                   </span>
                   <strong>{service.name}</strong>
+                  <em className={`service-status ${service.status === "OPEN" ? "is-open" : "is-planned"}`}>{service.status}</em>
                   <span className="service-map-description">{service.description}</span>
                   <span className="service-map-arrow" aria-hidden="true">
                     <ArrowRight size={20} />
@@ -290,7 +338,7 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
                         <b>{String(index + 1 + openTests.length).padStart(2, "0")}</b>
                         <span>
                           <strong>{test.name}</strong>
-                          <small>베타 기간 중 순차적으로 공개 예정입니다.</small>
+                          <small>{test.release ? `${test.release} · 베타 기간 중 순차 공개` : "베타 기간 중 순차적으로 공개 예정입니다."}</small>
                         </span>
                         <em>{test.status}</em>
                       </a>

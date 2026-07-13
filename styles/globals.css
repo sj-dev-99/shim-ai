@@ -434,6 +434,26 @@ input {
   line-height: 1.2;
 }
 
+.service-status {
+  width: fit-content;
+  margin-top: 8px;
+  padding: 4px 7px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.service-status.is-open {
+  background: var(--selected-panel);
+  color: var(--teal);
+}
+
+.service-status.is-planned {
+  background: rgba(184, 77, 61, 0.1);
+  color: var(--coral);
+}
+
 .service-map-description {
   min-height: 42px;
   margin-top: 8px;
@@ -458,6 +478,60 @@ input {
   display: grid;
   gap: 12px;
   margin-top: 12px;
+}
+
+.today-recommendation {
+  display: grid;
+  gap: 16px;
+  align-items: center;
+  margin: 2px 0 22px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(184, 77, 61, 0.12), transparent 44%),
+    var(--panel-soft);
+  box-shadow: var(--shadow);
+}
+
+.recommendation-kicker {
+  color: var(--coral);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.today-recommendation h2 {
+  margin: 6px 0 8px;
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.today-recommendation p {
+  max-width: 560px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.recommendation-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.recommendation-meta span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-clear);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .section-heading {

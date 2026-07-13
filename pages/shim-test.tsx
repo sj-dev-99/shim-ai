@@ -25,6 +25,7 @@ const tests = [
     description: "정서 인식, 스트레스 대처, 회복 탄력성 단서를 바탕으로 현재 나의 감정 조절 패턴을 살펴봅니다.",
     href: "/mind",
     status: "진행 가능",
+    profile: "닉네임 필수",
     icon: ClipboardCheck
   },
   {
@@ -32,6 +33,7 @@ const tests = [
     description: "애착 방식, 표현 습관, 갈등 반응을 바탕으로 연애에서 반복되는 관계 패턴을 분석합니다.",
     href: "/love-type",
     status: "준비중",
+    profile: "닉네임·성별 입력",
     icon: Heart
   },
   {
@@ -39,6 +41,7 @@ const tests = [
     description: "끌림의 기준, 안정감을 느끼는 조건, 관계에서 중요하게 보는 가치를 정리합니다.",
     href: "/ideal-type",
     status: "준비중",
+    profile: "닉네임·성별 입력",
     icon: Sparkles
   },
   {
@@ -46,6 +49,7 @@ const tests = [
     description: "친밀감, 거리두기, 거절과 부탁의 어려움처럼 사회적 관계에서 나타나는 나의 방식을 살펴봅니다.",
     href: "/relationship-test",
     status: "준비중",
+    profile: "닉네임 필수",
     icon: Users
   },
   {
@@ -53,6 +57,7 @@ const tests = [
     description: "겉으로는 기능하지만 내부적으로 소진과 공허감을 겪는 패턴을 자기점검 관점에서 다룹니다.",
     href: "/high-functioning-depression",
     status: "준비중",
+    profile: "닉네임 필수",
     icon: Brain
   }
 ];
@@ -123,7 +128,10 @@ export default function ShimTestPage({ theme, toggleTheme }: ShimTestPageProps) 
                       <Icon size={22} aria-hidden="true" />
                     </span>
                     <span className="test-card-body">
-                      <span className="test-status">{test.status}</span>
+                      <span className="test-status-row">
+                        <span className="test-status">{test.status}</span>
+                        <span className="test-profile-tag">{test.profile}</span>
+                      </span>
                       <strong>{test.title}</strong>
                       <span>{test.description}</span>
                     </span>

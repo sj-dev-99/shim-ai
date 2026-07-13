@@ -6,9 +6,10 @@ import { disclaimer } from "../lib/data";
 type ComingSoonPageProps = {
   title: string;
   description: string;
+  profileRequirement?: string;
 };
 
-export default function ComingSoonPage({ title, description }: ComingSoonPageProps) {
+export default function ComingSoonPage({ title, description, profileRequirement }: ComingSoonPageProps) {
   return (
     <>
       <Head>
@@ -42,6 +43,7 @@ export default function ComingSoonPage({ title, description }: ComingSoonPagePro
             <Clock3 size={18} aria-hidden="true" />
             베타 기간 중 순차적으로 공개할 예정입니다.
           </div>
+          {profileRequirement ? <p className="coming-soon-requirement">오픈 시 {profileRequirement} 후 검사가 시작됩니다.</p> : null}
         </section>
 
         <p className="notice">{disclaimer}</p>

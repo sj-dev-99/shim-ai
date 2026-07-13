@@ -2,9 +2,10 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ArrowLeft, BrainCircuit, RotateCcw, Send, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { submitBetaEvent } from "../lib/beta";
 import { disclaimer, getResultByScore, TEST_NAME } from "../lib/data";
+import { readTestProfile, TestProfile } from "../lib/testProfile";
 
 export default function ResultPage() {
   const router = useRouter();
@@ -15,6 +16,11 @@ export default function ResultPage() {
   const [selectedRating, setSelectedRating] = useState<"up" | "down" | null>(null);
   const [opinion, setOpinion] = useState("");
   const [opinionStatus, setOpinionStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [profile, setProfile] = useState<TestProfile | null>(null);
+
+  useEffect(() => {
+    setProfile(readTestProfile());
+  }, []);
 
   async function rate(rating: "up" | "down") {
     setSelectedRating(rating);
@@ -70,6 +76,7 @@ export default function ResultPage() {
 
         <section className="result-card">
           <span className="result-type">{result.label}</span>
+          {profile?.nickname ? <span className="result-owner">{profile.nickname}님의 결과 보고서</span> : null}
           <h1>{result.title}</h1>
           <p>{result.description}</p>
 

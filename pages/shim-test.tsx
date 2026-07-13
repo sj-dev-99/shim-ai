@@ -29,20 +29,12 @@ const tests = [
     icon: ClipboardCheck
   },
   {
-    title: "연애유형 분석",
-    description: "애착 방식, 표현 습관, 갈등 반응을 바탕으로 연애에서 반복되는 관계 패턴을 분석합니다.",
+    title: "연애유형·이상형 분석",
+    description: "애착 방식, 표현 습관, 끌림의 기준을 바탕으로 연애 패턴과 이상형을 함께 분석합니다.",
     href: "/love-type",
-    status: "준비중",
+    status: "진행 가능",
     profile: "닉네임·성별 입력",
     icon: Heart
-  },
-  {
-    title: "이상형 분석",
-    description: "끌림의 기준, 안정감을 느끼는 조건, 관계에서 중요하게 보는 가치를 정리합니다.",
-    href: "/ideal-type",
-    status: "준비중",
-    profile: "닉네임·성별 입력",
-    icon: Sparkles
   },
   {
     title: "대인관계 분석",

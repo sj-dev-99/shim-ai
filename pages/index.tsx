@@ -59,8 +59,7 @@ const services = [
 
 const featuredTests = [
   "AI 감정·회복 유형 테스트",
-  "연애유형 분석",
-  "이상형 분석",
+  "연애유형·이상형 분석",
   "대인관계 분석",
   "고지능 우울증 검사"
 ];
@@ -212,7 +211,7 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
             <span>실제 피드백 기반 개선 중</span>
           </div>
           <div>
-            <strong>5개</strong>
+            <strong>4개</strong>
             <span>심리검사 라인업 구성</span>
           </div>
           <div>

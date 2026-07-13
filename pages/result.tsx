@@ -78,11 +78,31 @@ export default function ResultPage() {
           <span className="result-type">{result.label}</span>
           {profile?.nickname ? <span className="result-owner">{profile.nickname}님의 결과 보고서</span> : null}
           <h1>{result.title}</h1>
-          <p>{result.description}</p>
+          <p className="result-lead">{result.coreMessage}</p>
 
           <div className="score-line">
             <span>총점</span>
             <span>{hasScore ? `${score}점` : "예시 결과"}</span>
+          </div>
+
+          <div className="report-summary-grid">
+            <article>
+              <strong>점수 해석</strong>
+              <p>{result.scoreMeaning}</p>
+            </article>
+            <article>
+              <strong>심리적 경향</strong>
+              <p>{result.description}</p>
+            </article>
+          </div>
+
+          <div className="result-section">
+            <h2>나에게 자주 나타나는 패턴</h2>
+            <ul>
+              {result.traits.map((trait) => (
+                <li key={trait}>{trait}</li>
+              ))}
+            </ul>
           </div>
 
           <div className="result-section">
@@ -95,8 +115,35 @@ export default function ResultPage() {
           </div>
 
           <div className="result-section">
+            <h2>주의하면 좋은 지점</h2>
+            <ul>
+              {result.cautions.map((caution) => (
+                <li key={caution}>{caution}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="result-section">
             <h2>오늘의 제안</h2>
             <p>{result.suggestion}</p>
+          </div>
+
+          <div className="result-section">
+            <h2>7일 회복 루틴</h2>
+            <div className="report-chip-grid">
+              {result.routine.map((item) => (
+                <span key={item}>{item}</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="result-section">
+            <h2>스스로에게 던져볼 질문</h2>
+            <ol className="report-question-list">
+              {result.reflectionQuestions.map((question) => (
+                <li key={question}>{question}</li>
+              ))}
+            </ol>
           </div>
 
           <section className="beta-result-panel" aria-label="AI 답변 만족도">

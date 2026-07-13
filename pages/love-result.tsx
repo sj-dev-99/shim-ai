@@ -69,11 +69,54 @@ export default function LoveResultPage() {
           <span className="result-type">{result.label}</span>
           <span className="result-owner">{profile?.nickname || ANONYMOUS_NICKNAME}님의 연애 보고서</span>
           <h1>{result.title}</h1>
-          <p>{result.summary}</p>
+          <p className="result-lead">{result.summary}</p>
+
+          <div className="love-score-grid report-score-grid" aria-label="연애 성향 점수">
+            <div>
+              <strong>{scores.stability}</strong>
+              <span>안정감</span>
+            </div>
+            <div>
+              <strong>{scores.expression}</strong>
+              <span>표현</span>
+            </div>
+            <div>
+              <strong>{scores.autonomy}</strong>
+              <span>자율성</span>
+            </div>
+            <div>
+              <strong>{scores.spark}</strong>
+              <span>설렘</span>
+            </div>
+          </div>
+
+          <div className="report-summary-grid">
+            <article>
+              <strong>관계 패턴</strong>
+              <p>{result.relationshipPattern}</p>
+            </article>
+            <article>
+              <strong>끌리는 이상형</strong>
+              <p>{result.idealType}</p>
+            </article>
+          </div>
 
           <div className="result-section">
-            <h2>끌리는 이상형</h2>
-            <p>{result.idealType}</p>
+            <h2>관계에서 필요한 정서적 조건</h2>
+            <ul>
+              {result.emotionalNeeds.map((need) => (
+                <li key={need}>{need}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="result-section">
+            <h2>잘 맞는 사람에게 보이는 신호</h2>
+            <ul>
+              {result.compatibleSignals.map((signal) => (
+                <li key={signal}>{signal}</li>
+              ))}
+            </ul>
           </div>
 
           <div className="result-section">
@@ -95,23 +138,22 @@ export default function LoveResultPage() {
             <p>{result.suggestion}</p>
           </div>
 
-          <div className="love-score-grid" aria-label="연애 성향 점수">
-            <div>
-              <strong>{scores.stability}</strong>
-              <span>안정감</span>
+          <div className="result-section">
+            <h2>추천 데이트 방식</h2>
+            <div className="report-chip-grid">
+              {result.dateGuide.map((item) => (
+                <span key={item}>{item}</span>
+              ))}
             </div>
-            <div>
-              <strong>{scores.expression}</strong>
-              <span>표현</span>
-            </div>
-            <div>
-              <strong>{scores.autonomy}</strong>
-              <span>자율성</span>
-            </div>
-            <div>
-              <strong>{scores.spark}</strong>
-              <span>설렘</span>
-            </div>
+          </div>
+
+          <div className="result-section">
+            <h2>상대에게 설명하기 좋은 문장</h2>
+            <ol className="report-question-list">
+              {result.conversationTips.map((tip) => (
+                <li key={tip}>{tip}</li>
+              ))}
+            </ol>
           </div>
 
           <div className="actions">

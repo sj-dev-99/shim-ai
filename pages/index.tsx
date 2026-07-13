@@ -266,12 +266,15 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
             <div className="test-status-groups">
               <div className="test-status-group">
                 <strong>오픈중</strong>
-                <div className="hero-test-list compact">
+                <div className="home-test-list">
                   {openTests.map((test, index) => (
                     <Link href={test.href} key={test.name}>
                       <a>
                         <b>{String(index + 1).padStart(2, "0")}</b>
-                        <span>{test.name}</span>
+                        <span>
+                          <strong>{test.name}</strong>
+                          <small>지금 바로 테스트할 수 있습니다.</small>
+                        </span>
                         <em>{test.status}</em>
                       </a>
                     </Link>
@@ -280,12 +283,15 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
               </div>
               <div className="test-status-group">
                 <strong>준비중</strong>
-                <div className="hero-test-list compact">
+                <div className="home-test-list">
                   {plannedTests.map((test, index) => (
                     <Link href={test.href} key={test.name}>
                       <a>
                         <b>{String(index + 1 + openTests.length).padStart(2, "0")}</b>
-                        <span>{test.name}</span>
+                        <span>
+                          <strong>{test.name}</strong>
+                          <small>베타 기간 중 순차적으로 공개 예정입니다.</small>
+                        </span>
                         <em>{test.status}</em>
                       </a>
                     </Link>

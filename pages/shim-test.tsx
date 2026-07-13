@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, BrainCircuit, Moon, Sparkles, Sun } from "lucide-react";
+import { ArrowLeft, ArrowRight, BrainCircuit, ClipboardCheck, Moon, Sparkles, Sun } from "lucide-react";
 import { disclaimer, TEST_CATEGORY, TEST_NAME } from "../lib/data";
 
 type ShimTestPageProps = {
@@ -66,7 +66,7 @@ export default function ShimTestPage({ theme, toggleTheme }: ShimTestPageProps) 
           <Link href="/mind">
             <a className="test-card">
               <span className="test-card-icon">
-                <BrainCircuit size={22} aria-hidden="true" />
+                <ClipboardCheck size={22} aria-hidden="true" />
               </span>
               <span className="test-card-body">
                 <strong>{TEST_NAME}</strong>

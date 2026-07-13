@@ -176,33 +176,31 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
               베타 서비스입니다. 지금은 심리검사를 중심으로 시작하고, 대화와 리포트, 관리 루틴으로
               확장하고 있습니다.
             </p>
-            <div className="actions">
-              <Link href="/shim-test">
-                <a className="primary-button">
-                  검사 라인업 보기
-                  <ArrowRight size={18} aria-hidden="true" />
-                </a>
-              </Link>
-              <Link href="/mind">
-                <a className="secondary-button">
-                  바로 테스트 시작
-                  <ClipboardCheck size={18} aria-hidden="true" />
-                </a>
-              </Link>
-            </div>
           </div>
-          <aside className="home-hero-panel" aria-label="현재 준비 중인 심리검사">
-            <span className="panel-label">SHIM Test Catalog</span>
-            <strong>현재 공개 및 준비 중인 검사</strong>
-            <div className="hero-test-list">
-              {featuredTests.map((test, index) => (
-                <span key={test}>
-                  <b>{String(index + 1).padStart(2, "0")}</b>
-                  {test}
-                </span>
-              ))}
-            </div>
-          </aside>
+        </section>
+
+        <section className="service-map service-map-priority" aria-label="SHIM AI 서비스 선택">
+          <div className="section-heading service-heading">
+            <span>Service Map</span>
+            <h2>필요한 방식으로 자기이해를 시작하세요</h2>
+          </div>
+          {services.map((service) => {
+            const Icon = service.icon;
+            return (
+              <Link href={service.href} key={service.name}>
+                <a className="service-map-item">
+                  <span className="service-map-icon">
+                    <Icon size={22} aria-hidden="true" />
+                  </span>
+                  <strong>{service.name}</strong>
+                  <span className="service-map-description">{service.description}</span>
+                  <span className="service-map-arrow" aria-hidden="true">
+                    <ArrowRight size={20} />
+                  </span>
+                </a>
+              </Link>
+            );
+          })}
         </section>
 
         <section className="trust-strip" aria-label="SHIM AI 운영 기준">
@@ -235,48 +233,40 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
           })}
         </section>
 
-        <section className="service-map" aria-label="SHIM AI 서비스 선택">
-          <div className="section-heading service-heading">
-            <span>Service Map</span>
-            <h2>필요한 방식으로 자기이해를 시작하세요</h2>
-          </div>
-          {services.map((service) => {
-            const Icon = service.icon;
-            return (
-              <Link href={service.href} key={service.name}>
-                <a className="service-map-item">
-                  <span className="service-map-icon">
-                    <Icon size={22} aria-hidden="true" />
-                  </span>
-                  <strong>{service.name}</strong>
-                  <span className="service-map-description">{service.description}</span>
-                  <span className="service-map-arrow" aria-hidden="true">
-                    <ArrowRight size={20} />
-                  </span>
-                </a>
-              </Link>
-            );
-          })}
-        </section>
-
-        <section className="featured-path" aria-label="추천 시작 경로">
+        <section className="test-catalog-panel" aria-label="현재 공개 및 준비 중인 검사">
           <div>
             <span className="eyebrow">
-              <Heart size={15} aria-hidden="true" />
-              Recommended
+              <ClipboardCheck size={15} aria-hidden="true" />
+              SHIM Test Catalog
             </span>
-            <h2>처음 방문했다면, 감정·회복 유형 테스트부터 시작해보세요.</h2>
+            <h2>현재 공개 및 준비 중인 검사</h2>
             <p>
-              현재 공개된 테스트는 감정 인식, 스트레스 대처, 회복 탄력성 단서를 바탕으로
-              나의 정서 조절 패턴을 살펴볼 수 있게 설계되어 있습니다.
+              감정·회복 테스트와 연애유형·이상형 분석은 지금 바로 이용할 수 있고,
+              대인관계와 고지능 우울증 검사는 순차적으로 공개할 예정입니다.
             </p>
+            <div className="hero-test-list compact">
+              {featuredTests.map((test, index) => (
+                <span key={test}>
+                  <b>{String(index + 1).padStart(2, "0")}</b>
+                  {test}
+                </span>
+              ))}
+            </div>
           </div>
-          <Link href="/mind">
-            <a className="primary-button">
-              시작하기
-              <ArrowRight size={18} aria-hidden="true" />
-            </a>
-          </Link>
+          <div className="test-catalog-actions">
+            <Link href="/shim-test">
+              <a className="primary-button">
+                검사 라인업 보기
+                <ArrowRight size={18} aria-hidden="true" />
+              </a>
+            </Link>
+            <Link href="/mind">
+              <a className="secondary-button">
+                바로 테스트 시작
+                <Heart size={18} aria-hidden="true" />
+              </a>
+            </Link>
+          </div>
         </section>
 
         <p className="notice">{disclaimer}</p>

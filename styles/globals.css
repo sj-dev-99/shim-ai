@@ -1039,6 +1039,221 @@ input {
   line-height: 1.6;
 }
 
+.diary-hero {
+  padding-bottom: 18px;
+}
+
+.diary-layout {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+
+.diary-writer,
+.diary-history {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+  box-shadow: var(--shadow);
+}
+
+.diary-emotion-field {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.diary-emotion-field legend,
+.diary-text-field > span {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.diary-emotion-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.diary-emotion-button {
+  display: grid;
+  gap: 4px;
+  min-height: 76px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  text-align: left;
+}
+
+.diary-emotion-button[aria-pressed="true"] {
+  border-color: var(--teal-strong);
+  background: var(--selected-panel);
+  box-shadow: inset 0 0 0 1px var(--teal-strong);
+}
+
+.diary-emotion-button strong {
+  font-size: 14px;
+}
+
+.diary-emotion-button span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.diary-text-field {
+  display: grid;
+  gap: 8px;
+}
+
+.diary-text-field textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.6;
+  outline: none;
+}
+
+.diary-text-field textarea:focus {
+  border-color: var(--teal-strong);
+  box-shadow: 0 0 0 3px rgba(111, 183, 162, 0.18);
+}
+
+.diary-comment-preview {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(241, 188, 93, 0.14), transparent 46%),
+    var(--panel-clear);
+  color: var(--teal);
+}
+
+.diary-comment-preview p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.diary-submit {
+  width: fit-content;
+}
+
+.diary-latest-card,
+.diary-empty,
+.diary-entry-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-clear);
+}
+
+.diary-latest-card,
+.diary-empty {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.diary-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.diary-latest-card strong,
+.diary-empty strong {
+  font-size: 16px;
+}
+
+.diary-latest-card p,
+.diary-empty span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.diary-entry-list {
+  display: grid;
+  gap: 10px;
+}
+
+.diary-entry-card {
+  position: relative;
+  display: grid;
+  gap: 9px;
+  padding: 14px 44px 14px 14px;
+}
+
+.diary-entry-card div {
+  display: grid;
+  gap: 3px;
+}
+
+.diary-entry-card span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.diary-entry-card strong {
+  font-size: 15px;
+}
+
+.diary-entry-card p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.diary-entry-card blockquote {
+  margin: 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--gold);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.diary-delete-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--muted);
+}
+
 .beta-dock {
   position: fixed;
   right: 14px;
@@ -1920,6 +2135,14 @@ input {
   }
 
   .report-chip-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .diary-layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  }
+
+  .diary-emotion-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 

@@ -39,7 +39,7 @@ const services = [
   },
   {
     name: "SHIM Diary",
-    description: "일상 기록 기반 감정 흐름 추적",
+    description: "감정일기 기록과 shim.ai 한줄 코멘트",
     href: "/diary",
     icon: BookOpenText
   },

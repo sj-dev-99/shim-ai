@@ -1,10 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/router";
 import { ArrowLeft, ArrowRight, BrainCircuit, Clock3, Moon, Sparkles, Sun } from "lucide-react";
 import { disclaimer, TEST_CATEGORY, TEST_NAME } from "../lib/data";
-import { readTestProfile, saveTestProfile } from "../lib/testProfile";
 
 type MindPageProps = {
   theme: "light" | "dark";
@@ -12,23 +9,7 @@ type MindPageProps = {
 };
 
 export default function MindPage({ theme, toggleTheme }: MindPageProps) {
-  const router = useRouter();
   const isDark = theme === "dark";
-  const [nickname, setNickname] = useState("");
-  const trimmedNickname = nickname.trim();
-
-  useEffect(() => {
-    const profile = readTestProfile();
-    if (profile?.nickname) setNickname(profile.nickname);
-  }, []);
-
-  function startTest(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!trimmedNickname) return;
-
-    saveTestProfile({ nickname: trimmedNickname });
-    router.push("/test");
-  }
 
   return (
     <>
@@ -76,31 +57,16 @@ export default function MindPage({ theme, toggleTheme }: MindPageProps) {
               이 테스트는 정서 인식, 스트레스 대처 방식, 회복 탄력성, 행동 활성화 경향을 12문항으로 살펴봅니다.
               임상 진단이 아니라, 현재 나의 감정 조절 패턴을 더 구체적으로 이해하기 위한 자기보고형 체크입니다.
             </p>
-            <form className="test-start-form" onSubmit={startTest}>
-              <label htmlFor="test-nickname">보고서에 표시할 이름</label>
-              <input
-                autoComplete="nickname"
-                id="test-nickname"
-                maxLength={24}
-                onChange={(event) => setNickname(event.target.value)}
-                placeholder="닉네임을 입력하세요"
-                required
-                type="text"
-                value={nickname}
-              />
-              <span>입력하지 않으면 테스트를 시작할 수 없습니다.</span>
-              <div className="actions">
-                <button className="primary-button" disabled={!trimmedNickname} type="submit">
+            <div className="actions">
+              <Link href="/test-start">
+                <a className="primary-button">
                   테스트 시작
                   <ArrowRight size={18} aria-hidden="true" />
-                </button>
-                <span className="secondary-button">
-                  <Clock3 size={18} aria-hidden="true" /> 약 2분
-                </span>
-              </div>
-            </form>
-            <div className="test-start-note">
-              이 검사는 성별에 따라 결과를 다르게 해석하지 않아 성별을 묻지 않습니다.
+                </a>
+              </Link>
+              <span className="secondary-button">
+                <Clock3 size={18} aria-hidden="true" /> 약 2분
+              </span>
             </div>
           </div>
         </section>

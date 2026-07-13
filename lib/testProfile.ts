@@ -5,6 +5,7 @@ export type TestProfile = {
   gender?: TestGender;
 };
 
+export const ANONYMOUS_NICKNAME = "익명";
 const TEST_PROFILE_KEY = "shim_ai_test_profile";
 
 function isStorageAvailable() {
@@ -33,10 +34,12 @@ export function readTestProfile(): TestProfile | null {
 export function saveTestProfile(profile: TestProfile) {
   if (!isStorageAvailable()) return;
 
+  const nickname = profile.nickname.trim() || ANONYMOUS_NICKNAME;
+
   window.localStorage.setItem(
     TEST_PROFILE_KEY,
     JSON.stringify({
-      nickname: profile.nickname.trim(),
+      nickname,
       gender: profile.gender
     })
   );

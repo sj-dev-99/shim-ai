@@ -1542,6 +1542,9 @@ input {
 }
 
 .test-start-note {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 7px;
   max-width: 480px;
   margin-top: 14px;
   padding-left: 12px;
@@ -1550,6 +1553,42 @@ input {
   font-size: 13px;
   font-weight: 800;
   line-height: 1.55;
+}
+
+.start-page-shell {
+  width: min(100%, 760px);
+}
+
+.test-start-page {
+  display: grid;
+  gap: 22px;
+  max-width: 460px;
+  margin: 58px auto 0;
+  padding: 0 4px;
+}
+
+.test-start-page h1 {
+  margin: 6px 0 24px;
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.test-start-page p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.start-brand {
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.test-start-submit {
+  width: 100%;
+  margin-top: 8px;
 }
 
 @media (min-width: 720px) {

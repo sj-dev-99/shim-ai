@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { ArrowLeft, ArrowRight, BrainCircuit, Check, RotateCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { disclaimer, options, questions, TEST_NAME } from "../lib/data";
-import { readTestProfile, TestProfile } from "../lib/testProfile";
+import { ANONYMOUS_NICKNAME, readTestProfile, saveTestProfile, TestProfile } from "../lib/testProfile";
 
 export default function TestPage() {
   const router = useRouter();
@@ -21,7 +21,14 @@ export default function TestPage() {
   );
 
   useEffect(() => {
-    setProfile(readTestProfile());
+    const savedProfile = readTestProfile();
+    if (savedProfile) {
+      setProfile(savedProfile);
+    } else {
+      const anonymousProfile = { nickname: ANONYMOUS_NICKNAME };
+      saveTestProfile(anonymousProfile);
+      setProfile(anonymousProfile);
+    }
     setProfileChecked(true);
   }, []);
 
@@ -59,48 +66,6 @@ export default function TestPage() {
             <span className="result-type">준비 중</span>
             <h1>테스트 정보를 확인하고 있습니다.</h1>
           </section>
-        </main>
-      </>
-    );
-  }
-
-  if (profileChecked && !profile) {
-    return (
-      <>
-        <Head>
-          <title>테스트 시작 전 정보 입력 | {TEST_NAME}</title>
-        </Head>
-        <main className="page-shell">
-          <header className="topbar">
-            <Link href="/mind">
-              <a className="ghost-link">
-                <ArrowLeft size={17} aria-hidden="true" />
-                소개
-              </a>
-            </Link>
-            <div className="brand">
-              <span className="brand-mark">
-                <BrainCircuit size={19} aria-hidden="true" />
-              </span>
-              테스트
-            </div>
-          </header>
-
-          <section className="question-panel start-required-panel">
-            <span className="result-type">필수 입력</span>
-            <h1>테스트 시작 전 이름 또는 닉네임을 입력해주세요.</h1>
-            <p>
-              결과 보고서에 표시할 이름이 필요합니다. 소개 페이지에서 닉네임을 입력한 뒤 테스트를 시작할 수 있습니다.
-            </p>
-            <Link href="/mind">
-              <a className="primary-button">
-                입력하러 가기
-                <ArrowRight size={18} aria-hidden="true" />
-              </a>
-            </Link>
-          </section>
-
-          <p className="notice">{disclaimer}</p>
         </main>
       </>
     );

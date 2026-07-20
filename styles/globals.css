@@ -243,9 +243,13 @@ input {
 .hero h1 {
   max-width: 680px;
   margin: 16px 0 12px;
-  font-size: 42px;
-  line-height: 0.95;
+  font-size: 38px;
+  line-height: 1.12;
   letter-spacing: 0;
+}
+
+.home-hero-copy h1 span {
+  display: block;
 }
 
 .hero p {
@@ -257,19 +261,31 @@ input {
 }
 
 .daily-quote {
-  display: inline-flex;
+  display: grid;
   width: fit-content;
-  max-width: min(100%, 640px);
-  align-items: center;
-  margin: 0 0 12px;
-  padding: 9px 12px;
-  border-left: 3px solid var(--gold);
+  max-width: min(100%, 430px);
+  gap: 5px;
+  margin: 2px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(111, 183, 162, 0.32);
   border-radius: 8px;
-  background: var(--panel-clear);
+  background: linear-gradient(135deg, rgba(236, 248, 244, 0.92), rgba(255, 255, 255, 0.72));
+  box-shadow: 0 10px 22px rgba(38, 56, 50, 0.06);
+}
+
+.daily-quote strong {
+  color: var(--teal);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.daily-quote p {
+  margin: 0;
   color: var(--ink);
-  font-size: 14px;
-  font-weight: 800;
-  line-height: 1.5;
+  font-size: 15px;
+  font-weight: 850;
+  line-height: 1.55;
   word-break: keep-all;
 }
 
@@ -623,6 +639,12 @@ input {
   font-size: 12px;
   font-weight: 900;
   line-height: 1.2;
+}
+
+.mood-options .mood-more-button {
+  border-style: dashed;
+  background: var(--panel-clear);
+  color: var(--teal);
 }
 
 .mood-diary-link {
@@ -1517,16 +1539,18 @@ input {
 
 .beta-dock {
   position: fixed;
-  right: 14px;
-  bottom: 14px;
-  left: 14px;
+  right: 16px;
+  bottom: 16px;
   z-index: 30;
   display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
+  justify-items: end;
   gap: 8px;
-  width: min(100% - 28px, 560px);
-  margin: 0 auto;
+}
+
+.beta-menu {
+  display: grid;
+  width: 158px;
+  gap: 8px;
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1536,9 +1560,19 @@ input {
 }
 
 .beta-version {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--panel-clear);
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
+}
+
+.beta-version b {
+  color: var(--ink);
+  font-size: 12px;
 }
 
 .beta-action,
@@ -1559,6 +1593,22 @@ input {
 
 .beta-action {
   padding: 0 10px;
+}
+
+.beta-fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 46px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--teal-strong);
+  color: var(--teal-ink);
+  box-shadow: 0 14px 32px rgba(19, 116, 106, 0.24);
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .beta-modal-backdrop {
@@ -2213,7 +2263,8 @@ input {
 
 @media (min-width: 480px) {
   .hero h1 {
-    font-size: 56px;
+    font-size: 52px;
+    line-height: 1.08;
   }
 
   .service-map {
@@ -2404,7 +2455,8 @@ input {
   }
 
   .hero h1 {
-    font-size: 72px;
+    font-size: 68px;
+    line-height: 1.04;
   }
 
   .insight-band {

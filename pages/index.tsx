@@ -112,6 +112,7 @@ const moodOptions = [
   { emoji: "🥺", label: "외로워요", diaryId: "lonely", note: "외로움도 오늘의 중요한 감정입니다. 조용히 들어봐도 괜찮아요.", prompt: "오늘 어떤 순간에 혼자라고 느꼈나요?" }
 ];
 
+const INITIAL_MOOD_COUNT = 6;
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -121,7 +122,7 @@ function getDailyQuote(date = new Date()) {
   const month = kstDate.getUTCMonth();
   const day = kstDate.getUTCDate();
   const dayIndex = Math.floor((Date.UTC(year, month, day) - Date.UTC(2026, 0, 1)) / DAY_MS);
-  return `${dailyQuotes[Math.abs(dayIndex) % dailyQuotes.length]} - shim.ai`;
+  return dailyQuotes[Math.abs(dayIndex) % dailyQuotes.length];
 }
 
 function getMsUntilNextKstMidnight(date = new Date()) {
@@ -135,9 +136,11 @@ function getMsUntilNextKstMidnight(date = new Date()) {
 
 export default function HomePage({ theme, toggleTheme }: HomePageProps) {
   const isDark = theme === "dark";
-  const [dailyQuote, setDailyQuote] = useState(`${dailyQuotes[0]} - shim.ai`);
+  const [dailyQuote, setDailyQuote] = useState(dailyQuotes[0]);
   const [recommendedCount, setRecommendedCount] = useState<number | null>(null);
   const [selectedMood, setSelectedMood] = useState(moodOptions[0]);
+  const [showAllMoods, setShowAllMoods] = useState(false);
+  const visibleMoodOptions = showAllMoods ? moodOptions : moodOptions.slice(0, INITIAL_MOOD_COUNT);
 
   useEffect(() => {
     let timeoutId: number;
@@ -219,10 +222,14 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
               <Sparkles size={15} aria-hidden="true" />
               AI 심리검사 기반 자기이해 플랫폼
             </span>
-            <h1>AI와 함께 나를 더 정확하게 이해하세요.</h1>
-            <p className="daily-quote" aria-label="오늘의 글귀">
-              {dailyQuote}
-            </p>
+            <h1>
+              <span>AI와 함께</span>
+              <span>나를 더 정확하게 이해하세요.</span>
+            </h1>
+            <div className="daily-quote" aria-label="오늘의 AI 한줄">
+              <strong>🌿 오늘의 AI 한줄</strong>
+              <p>{dailyQuote}</p>
+            </div>
             <p>
               AI 심리테스트와 감정기록을 통해 나를 이해하고 성장하는 자기이해 플랫폼입니다.
               오늘의 감정부터 관계 패턴까지 쉽게 기록하고 해석해보세요.
@@ -237,9 +244,9 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
             <p>지금 내 감정 조절 패턴과 회복 방식을 12문항으로 확인해보세요.</p>
             <div className="recommendation-meta" aria-label="추천 테스트 정보">
               <span>3분</span>
-              <span>★★★★★</span>
+              <span>12문항</span>
               <span>
-                {recommendedCount === null ? "참여 수 집계 중" : `${recommendedCount.toLocaleString("ko-KR")}명이 참여했습니다.`}
+                {recommendedCount === null ? "참여 수 집계 중" : `${recommendedCount.toLocaleString("ko-KR")}명 참여`}
               </span>
             </div>
           </div>
@@ -259,7 +266,7 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
             <strong className="mood-question">{selectedMood.prompt}</strong>
           </div>
           <div className="mood-options" role="group" aria-label="기분 선택">
-            {moodOptions.map((mood) => (
+            {visibleMoodOptions.map((mood) => (
               <button
                 aria-pressed={selectedMood.label === mood.label}
                 className={selectedMood.label === mood.label ? "is-selected" : ""}
@@ -271,6 +278,15 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
                 <small>{mood.label}</small>
               </button>
             ))}
+            <button
+              aria-expanded={showAllMoods}
+              className="mood-more-button"
+              onClick={() => setShowAllMoods((value) => !value)}
+              type="button"
+            >
+              <span aria-hidden="true">{showAllMoods ? "−" : "+"}</span>
+              <small>{showAllMoods ? "접기" : "더보기"}</small>
+            </button>
           </div>
           <Link href={`/diary?emotion=${selectedMood.diaryId}`}>
             <a className="mood-diary-link">

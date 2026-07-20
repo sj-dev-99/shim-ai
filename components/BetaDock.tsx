@@ -22,6 +22,7 @@ export default function BetaDock() {
   const [message, setMessage] = useState("");
   const [score, setScore] = useState(5);
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [isOpen, setIsOpen] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -48,6 +49,7 @@ export default function BetaDock() {
   }
 
   function open(type: ModalType) {
+    setIsOpen(false);
     setModalType(type);
     setScore(5);
     setStatus("idle");
@@ -57,14 +59,31 @@ export default function BetaDock() {
   return (
     <>
       <div className="beta-dock" aria-label="베타 테스트 도구">
-        <span className="beta-version">{BETA_VERSION}</span>
-        <button className="beta-action" onClick={() => open("feedback")} type="button">
-          <MessageCircle size={16} aria-hidden="true" />
+        {isOpen ? (
+          <div className="beta-menu" role="menu" aria-label="피드백 메뉴">
+            <button className="beta-action" onClick={() => open("feedback")} role="menuitem" type="button">
+              <MessageCircle size={16} aria-hidden="true" />
+              피드백
+            </button>
+            <button className="beta-action" onClick={() => open("bug_report")} role="menuitem" type="button">
+              <AlertTriangle size={16} aria-hidden="true" />
+              오류 신고
+            </button>
+            <span className="beta-version">
+              <b>버전</b>
+              {BETA_VERSION}
+            </span>
+          </div>
+        ) : null}
+        <button
+          aria-expanded={isOpen}
+          aria-label={isOpen ? "피드백 메뉴 닫기" : "피드백 메뉴 열기"}
+          className="beta-fab"
+          onClick={() => setIsOpen((value) => !value)}
+          type="button"
+        >
+          <MessageCircle size={17} aria-hidden="true" />
           피드백
-        </button>
-        <button className="beta-action" onClick={() => open("bug_report")} type="button">
-          <AlertTriangle size={16} aria-hidden="true" />
-          오류 신고
         </button>
       </div>
 

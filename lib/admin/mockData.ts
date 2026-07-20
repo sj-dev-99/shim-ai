@@ -106,6 +106,14 @@ export const mockAdminData: AdminData = {
   ],
   versionNotes: [
     {
+      id: "ver-005",
+      version: "Beta v0.1.4",
+      title: "검사 시작 화면 간소화 및 결과 리포트 보강",
+      description:
+        "메인 UX와 피드백 FAB를 정리하고, 대인관계 분석·고지능 우울증 검사 안정화와 함께 검사 시작 페이지를 더 가볍게 다듬었습니다.",
+      createdAt: "2026-07-20T18:30:00+09:00"
+    },
+    {
       id: "ver-004",
       version: "Beta v0.1.3",
       title: "서비스 카드 UI 및 베타 데이터 저장 구조 개선",

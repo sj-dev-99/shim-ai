@@ -72,9 +72,14 @@ export default function RelationshipTestStartPage() {
             </span>
             <h1>{RELATIONSHIP_TEST_NAME}</h1>
             <p>
-              사람들과 가까워지는 방식, 감정을 표현하는 습관, 나의 경계와 갈등 대처 방식을 함께 살펴봅니다.
-              관계에서 반복되는 편안함과 어려움을 자기이해 언어로 정리해보세요.
+              사람들과 가까워지고 거리를 두는 방식, 감정을 표현하는 습관을 가볍게 확인해보세요.
+              결과에서는 반복되는 관계 리듬과 소통 포인트를 정리해드립니다.
             </p>
+            <div className="test-summary-pills" aria-label="검사 요약">
+              <span>12문항</span>
+              <span>약 3분</span>
+              <span>관계 패턴 리포트</span>
+            </div>
 
             <form className="test-start-form" onSubmit={startTest}>
               <label htmlFor="relationship-nickname">보고서에 표시할 이름</label>
@@ -99,21 +104,6 @@ export default function RelationshipTestStartPage() {
               <Clock3 size={16} aria-hidden="true" />
               약 3분, 12문항으로 구성된 베타 테스트입니다. 성별에 따라 결과를 다르게 해석하지 않아 성별은 묻지 않습니다.
             </div>
-          </div>
-        </section>
-
-        <section className="insight-band" aria-label="검사 구성">
-          <div className="insight-item">
-            <strong>거리감</strong>
-            <span>가까움과 독립감 사이에서 편안한 관계 리듬을 봅니다.</span>
-          </div>
-          <div className="insight-item">
-            <strong>표현 방식</strong>
-            <span>감정, 부탁, 서운함을 어떻게 말로 풀어내는지 살펴봅니다.</span>
-          </div>
-          <div className="insight-item">
-            <strong>갈등 대처</strong>
-            <span>불편한 상황을 피하는지, 조정하는지, 회복하는지 분석합니다.</span>
           </div>
         </section>
 

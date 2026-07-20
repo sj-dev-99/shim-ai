@@ -171,6 +171,11 @@ export default function ResultPage() {
             <span>{hasScore ? `${score}점` : "예시 결과"}</span>
           </div>
 
+          <div className="result-method-note">
+            이 리포트는 정서 인식, 스트레스 대처, 회복 탄력성, 행동 활성화 답변을 함께 살펴
+            현재 가장 두드러지는 감정 조절 경향을 정리한 결과입니다.
+          </div>
+
           <div className="report-summary-grid">
             <article>
               <strong>점수 해석</strong>

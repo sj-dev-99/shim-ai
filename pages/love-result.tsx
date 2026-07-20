@@ -142,6 +142,11 @@ export default function LoveResultPage() {
           <h1>{result.title}</h1>
           <p className="result-lead">{result.summary}</p>
 
+          <div className="result-method-note">
+            이 리포트는 애정 표현, 안정감, 자율성, 설렘 반응을 함께 살펴 연애에서 반복되는 관계 패턴과
+            내가 끌리는 이상형의 정서적 기준을 정리한 결과입니다.
+          </div>
+
           <div className="love-score-grid report-score-grid" aria-label="연애 성향 점수">
             <div>
               <strong>{scores.stability}</strong>

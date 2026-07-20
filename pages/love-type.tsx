@@ -78,9 +78,14 @@ export default function LoveTypePage() {
             </span>
             <h1>{LOVE_TEST_NAME}</h1>
             <p>
-              연애에서 반복되는 애정 표현 방식과 내가 끌리는 이상형의 기준을 함께 살펴봅니다.
-              설렘, 안정감, 표현 방식, 자율성의 균형을 바탕으로 현재 나의 관계 패턴을 정리합니다.
+              내가 사랑을 표현하고 관계를 유지하는 방식, 그리고 자연스럽게 끌리는 사람의 기준을 함께 확인해보세요.
+              결과에서는 현재 연애 패턴과 잘 맞는 관계 조건을 정리해드립니다.
             </p>
+            <div className="test-summary-pills" aria-label="검사 요약">
+              <span>12문항</span>
+              <span>약 3분</span>
+              <span>연애·이상형 리포트</span>
+            </div>
 
             <form className="test-start-form love-start-form" onSubmit={startTest}>
               <label htmlFor="love-nickname">보고서에 표시할 이름</label>
@@ -136,21 +141,6 @@ export default function LoveTypePage() {
               <Clock3 size={16} aria-hidden="true" />
               약 3분, 12문항으로 구성된 베타 테스트입니다.
             </div>
-          </div>
-        </section>
-
-        <section className="insight-band" aria-label="검사 구성">
-          <div className="insight-item">
-            <strong>연애유형</strong>
-            <span>애착, 표현, 갈등 반응에서 반복되는 관계 패턴을 봅니다.</span>
-          </div>
-          <div className="insight-item">
-            <strong>이상형 기준</strong>
-            <span>내가 끌리는 사람의 정서적 조건과 관계 가치를 정리합니다.</span>
-          </div>
-          <div className="insight-item">
-            <strong>4가지 결과</strong>
-            <span>안정형, 표현형, 자율형, 설렘형 중 가장 강한 경향을 보여줍니다.</span>
           </div>
         </section>
 

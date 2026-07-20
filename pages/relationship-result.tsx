@@ -139,6 +139,11 @@ export default function RelationshipResultPage() {
           <h1>{result.title}</h1>
           <p className="result-lead">{result.summary}</p>
 
+          <div className="result-method-note">
+            이 리포트는 관계 거리감, 표현 방식, 경계감, 갈등 대처 답변을 함께 살펴
+            사람들과의 관계에서 반복되는 편안함과 어려움을 정리한 결과입니다.
+          </div>
+
           <div className="love-score-grid report-score-grid" aria-label="대인관계 성향 점수">
             <div>
               <strong>{scores.closeness}</strong>

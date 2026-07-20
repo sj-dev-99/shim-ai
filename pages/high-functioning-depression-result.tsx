@@ -144,6 +144,11 @@ export default function HighFunctioningDepressionResultPage() {
             <span>{total}점</span>
           </div>
 
+          <div className="result-method-note">
+            이 리포트는 숨은 우울감, 흥미 저하, 에너지 소진, 자기압박 답변을 함께 살펴
+            겉으로 기능을 유지하는 동안 마음 안쪽에 쌓인 신호를 정리한 결과입니다.
+          </div>
+
           <div className="result-safety-panel">
             <strong>중요 안내</strong>
             <p>

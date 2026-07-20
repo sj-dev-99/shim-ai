@@ -120,7 +120,7 @@ export default function HighFunctioningDepressionStartPage() {
           </div>
         </section>
 
-        <p className="notice">{disclaimer} 위기 상황이거나 자해·죽음 생각이 있다면 즉시 988 또는 119에 도움을 요청하세요.</p>
+        <p className="notice">{disclaimer} 위기 상황이거나 자해·죽음 생각이 있다면 즉시 한국생명의전화 1588-9191 또는 119에 도움을 요청하세요.</p>
       </main>
     </>
   );

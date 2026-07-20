@@ -128,7 +128,7 @@ export default function HighFunctioningDepressionQuestionsPage() {
           </div>
         </section>
 
-        <p className="notice">{disclaimer} 자해·죽음 생각이 있다면 테스트를 계속하기보다 즉시 988 또는 119에 연락하세요.</p>
+        <p className="notice">{disclaimer} 자해·죽음 생각이 있다면 테스트를 계속하기보다 즉시 한국생명의전화 1588-9191 또는 119에 연락하세요.</p>
       </main>
     </>
   );

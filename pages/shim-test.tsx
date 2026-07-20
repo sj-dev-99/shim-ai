@@ -48,9 +48,8 @@ const tests = [
     title: "고지능 우울증 검사",
     description: "겉으로는 기능하지만 내부적으로 소진과 공허감을 겪는 패턴을 자기점검 관점에서 다룹니다.",
     href: "/high-functioning-depression",
-    status: "준비중",
-    profile: "닉네임 필수",
-    release: "출시 예정 2026.08 · 베타 기간 중 순차 공개",
+    status: "진행 가능",
+    profile: "닉네임 선택",
     icon: Brain
   }
 ];
@@ -124,7 +123,6 @@ export default function ShimTestPage({ theme, toggleTheme }: ShimTestPageProps) 
                       <span className="test-status-row">
                         <span className="test-status">{test.status}</span>
                         <span className="test-profile-tag">{test.profile}</span>
-                        {test.release ? <span className="test-release-tag">{test.release}</span> : null}
                       </span>
                       <strong>{test.title}</strong>
                       <span>{test.description}</span>

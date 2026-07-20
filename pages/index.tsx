@@ -74,9 +74,8 @@ const featuredTests = [
   },
   {
     name: "대인관계 분석",
-    status: "준비중",
-    href: "/relationship-test",
-    release: "출시 예정 2026.07"
+    status: "오픈중",
+    href: "/relationship-test"
   },
   {
     name: "고지능 우울증 검사",
@@ -351,8 +350,8 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
             </span>
             <h2>현재 공개 및 준비 중인 검사</h2>
             <p>
-              감정·회복 테스트와 연애유형·이상형 분석은 지금 바로 이용할 수 있고,
-              대인관계와 고지능 우울증 검사는 순차적으로 공개할 예정입니다.
+              감정·회복 테스트, 연애유형·이상형 분석, 대인관계 분석은 지금 바로 이용할 수 있고,
+              고지능 우울증 검사는 순차적으로 공개할 예정입니다.
             </p>
             <div className="test-status-groups">
               <div className="test-status-group">

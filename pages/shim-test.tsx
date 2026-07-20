@@ -40,8 +40,8 @@ const tests = [
     title: "대인관계 분석",
     description: "친밀감, 거리두기, 거절과 부탁의 어려움처럼 사회적 관계에서 나타나는 나의 방식을 살펴봅니다.",
     href: "/relationship-test",
-    status: "준비중",
-    profile: "닉네임 필수",
+    status: "진행 가능",
+    profile: "닉네임 선택",
     icon: Users
   },
   {

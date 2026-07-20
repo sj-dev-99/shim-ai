@@ -25,7 +25,7 @@ const tests = [
     description: "정서 인식, 스트레스 대처, 회복 탄력성 단서를 바탕으로 현재 나의 감정 조절 패턴을 살펴봅니다.",
     href: "/mind",
     status: "진행 가능",
-    profile: "닉네임 필수",
+    profile: "닉네임 선택",
     icon: ClipboardCheck
   },
   {
@@ -50,6 +50,7 @@ const tests = [
     href: "/high-functioning-depression",
     status: "준비중",
     profile: "닉네임 필수",
+    release: "출시 예정 2026.08 · 베타 기간 중 순차 공개",
     icon: Brain
   }
 ];
@@ -123,6 +124,7 @@ export default function ShimTestPage({ theme, toggleTheme }: ShimTestPageProps) 
                       <span className="test-status-row">
                         <span className="test-status">{test.status}</span>
                         <span className="test-profile-tag">{test.profile}</span>
+                        {test.release ? <span className="test-release-tag">{test.release}</span> : null}
                       </span>
                       <strong>{test.title}</strong>
                       <span>{test.description}</span>

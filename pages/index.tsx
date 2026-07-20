@@ -29,64 +29,42 @@ const services = [
     description: "감정, 관계, 사고 패턴을 다루는 AI 심리검사 라인업",
     href: "/shim-test",
     icon: ClipboardCheck,
-    status: "OPEN"
+    status: "OPEN",
+    action: "검사 라인업 보기"
   },
   {
     name: "SHIM Diary",
     description: "오늘의 감정을 기록하면 AI가 작은 위로와 한줄 코멘트를 남겨드립니다.",
     href: "/diary",
     icon: BookOpenText,
-    status: "OPEN"
+    status: "OPEN",
+    action: "감정 기록하기"
   },
   {
     name: "SHIM Report",
     description: "지난 한 달 동안 내 감정이 어떻게 달라졌는지 AI가 분석해드립니다.",
     href: "/report",
     icon: BarChart3,
-    status: "준비중"
+    status: "준비중",
+    action: "오픈 예정"
   },
   {
     name: "SHIM Care",
     description: "AI가 추천하는 나만의 회복 루틴",
     href: "/care",
     icon: HeartPulse,
-    status: "준비중"
+    status: "준비중",
+    action: "오픈 예정"
   },
   {
     name: "SHIM Talk",
     description: "대화형 감정 정리와 자기이해 코칭",
     href: "/talk",
     icon: MessageCircleHeart,
-    status: "준비중"
-  }
-];
-
-const featuredTests = [
-  {
-    name: "AI 감정·회복 유형 테스트",
-    status: "오픈중",
-    href: "/mind"
-  },
-  {
-    name: "연애유형·이상형 분석",
-    status: "오픈중",
-    href: "/love-type"
-  },
-  {
-    name: "대인관계 분석",
-    status: "오픈중",
-    href: "/relationship-test"
-  },
-  {
-    name: "고지능 우울증 검사",
     status: "준비중",
-    href: "/high-functioning-depression",
-    release: "출시 예정 2026.08"
+    action: "오픈 예정"
   }
 ];
-
-const openTests = featuredTests.filter((test) => test.status === "오픈중");
-const plannedTests = featuredTests.filter((test) => test.status === "준비중");
 
 const platformPoints = [
   {
@@ -318,7 +296,8 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
                   <strong>{service.name}</strong>
                   <em className={`service-status ${service.status === "OPEN" ? "is-open" : "is-planned"}`}>{service.status}</em>
                   <span className="service-map-description">{service.description}</span>
-                  <span className="service-map-arrow" aria-hidden="true">
+                  <span className={`service-map-action ${service.status === "OPEN" ? "is-open" : "is-planned"}`}>
+                    {service.action}
                     <ArrowRight size={20} />
                   </span>
                 </a>
@@ -340,64 +319,6 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
               </article>
             );
           })}
-        </section>
-
-        <section className="test-catalog-panel" aria-label="현재 공개 및 준비 중인 검사">
-          <div>
-            <span className="eyebrow">
-              <ClipboardCheck size={15} aria-hidden="true" />
-              SHIM Test Catalog
-            </span>
-            <h2>현재 공개 및 준비 중인 검사</h2>
-            <p>
-              감정·회복 테스트, 연애유형·이상형 분석, 대인관계 분석은 지금 바로 이용할 수 있고,
-              고지능 우울증 검사는 순차적으로 공개할 예정입니다.
-            </p>
-            <div className="test-status-groups">
-              <div className="test-status-group">
-                <strong>오픈중</strong>
-                <div className="home-test-list">
-                  {openTests.map((test, index) => (
-                    <Link href={test.href} key={test.name}>
-                      <a>
-                        <b>{String(index + 1).padStart(2, "0")}</b>
-                        <span>
-                          <strong>{test.name}</strong>
-                          <small>지금 바로 테스트할 수 있습니다.</small>
-                        </span>
-                        <em>{test.status}</em>
-                      </a>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-              <div className="test-status-group">
-                <strong>준비중</strong>
-                <div className="home-test-list">
-                  {plannedTests.map((test, index) => (
-                    <Link href={test.href} key={test.name}>
-                      <a>
-                        <b>{String(index + 1 + openTests.length).padStart(2, "0")}</b>
-                        <span>
-                          <strong>{test.name}</strong>
-                          <small>{test.release ? `${test.release} · 베타 기간 중 순차 공개` : "베타 기간 중 순차적으로 공개 예정입니다."}</small>
-                        </span>
-                        <em>{test.status}</em>
-                      </a>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="test-catalog-actions">
-            <Link href="/shim-test">
-              <a className="primary-button">
-                검사 라인업 보기
-                <ArrowRight size={18} aria-hidden="true" />
-              </a>
-            </Link>
-          </div>
         </section>
 
         <p className="notice">{disclaimer}</p>

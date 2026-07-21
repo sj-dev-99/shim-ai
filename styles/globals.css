@@ -49,11 +49,17 @@
 
 html {
   min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   min-height: 100%;
+  width: 100%;
+  max-width: 100%;
   margin: 0;
+  overflow-x: hidden;
   color: var(--ink);
   background: var(--body-bg);
   font-family:
@@ -75,7 +81,9 @@ input {
 }
 
 .page-shell {
-  width: min(100%, 960px);
+  width: 100%;
+  max-width: 960px;
+  min-width: 0;
   min-height: 100vh;
   margin: 0 auto;
   padding: 22px 18px 108px;
@@ -138,14 +146,20 @@ input {
 }
 
 .shim-home-shell {
-  width: min(100%, 1060px);
-  padding: max(20px, env(safe-area-inset-top)) 18px calc(104px + env(safe-area-inset-bottom));
+  --home-side-padding: 20px;
+  --service-card-width: min(82vw, 330px);
+  width: 100%;
+  max-width: 1060px;
+  min-width: 0;
+  padding: max(20px, env(safe-area-inset-top)) var(--home-side-padding) calc(104px + env(safe-area-inset-bottom));
+  overflow-x: clip;
 }
 
 .shim-hero {
   display: grid;
   min-height: 52vh;
   align-content: start;
+  width: 100%;
   padding: 4px 0 48px;
 }
 
@@ -196,12 +210,12 @@ input {
 }
 
 .shim-hero h1 {
-  max-width: 390px;
+  max-width: 360px;
   margin: 0;
   color: var(--ink);
-  font-size: 36px;
+  font-size: 34px;
   font-weight: 900;
-  line-height: 1.17;
+  line-height: 1.22;
   letter-spacing: 0;
   word-break: keep-all;
   overflow-wrap: normal;
@@ -260,17 +274,22 @@ input {
 
 .shim-carousel-shell {
   position: relative;
-  margin-inline: -18px;
+  width: 100vw;
+  max-width: 100vw;
+  margin-inline: calc(var(--home-side-padding) * -1);
+  overflow: hidden;
 }
 
 .shim-service-carousel {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 286px;
+  grid-auto-columns: var(--service-card-width);
   gap: 14px;
   overflow-x: auto;
-  padding: 8px calc((100vw - 286px) / 2) 20px;
-  scroll-padding-inline: calc((100vw - 286px) / 2);
+  width: 100%;
+  max-width: 100%;
+  padding: 8px max(20px, calc((100vw - var(--service-card-width)) / 2)) 20px;
+  scroll-padding-inline: max(20px, calc((100vw - var(--service-card-width)) / 2));
   scroll-snap-type: x mandatory;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
@@ -294,6 +313,8 @@ input {
   --accent-soft: var(--selected-panel);
   position: relative;
   display: grid;
+  width: var(--service-card-width);
+  min-width: 0;
   min-height: 346px;
   align-content: start;
   gap: 12px;
@@ -683,15 +704,15 @@ input {
 }
 
 @media (max-width: 380px) {
-  .shim-hero h1 {
-    font-size: 34px;
-    line-height: 1.2;
+  .shim-home-shell {
+    --home-side-padding: 20px;
+    --service-card-width: min(82vw, 320px);
   }
 
-  .shim-service-carousel {
-    grid-auto-columns: 276px;
-    padding-inline: calc((100vw - 276px) / 2);
-    scroll-padding-inline: calc((100vw - 276px) / 2);
+  .shim-hero h1 {
+    max-width: 330px;
+    font-size: 32px;
+    line-height: 1.2;
   }
 
   .shim-service-card {
@@ -3083,16 +3104,15 @@ input {
 }
 
 @media (min-width: 480px) {
+  .shim-home-shell {
+    --home-side-padding: 24px;
+    --service-card-width: min(78vw, 340px);
+  }
+
   .shim-hero h1 {
     max-width: 520px;
     font-size: 44px;
     line-height: 1.16;
-  }
-
-  .shim-service-carousel {
-    grid-auto-columns: 320px;
-    padding-inline: calc((100vw - 320px) / 2);
-    scroll-padding-inline: calc((100vw - 320px) / 2);
   }
 
   .hero h1 {
@@ -3317,6 +3337,8 @@ input {
   }
 
   .shim-home-shell {
+    --home-side-padding: 30px;
+    --service-card-width: 360px;
     padding-top: 30px;
   }
 
@@ -3343,12 +3365,6 @@ input {
   .shim-section-heading h2 {
     max-width: 640px;
     font-size: 32px;
-  }
-
-  .shim-service-carousel {
-    grid-auto-columns: 360px;
-    padding-inline: calc((100vw - 360px) / 2);
-    scroll-padding-inline: calc((100vw - 360px) / 2);
   }
 
   .shim-service-card {
@@ -3499,6 +3515,12 @@ input {
 }
 
 @media (min-width: 980px) {
+  .shim-carousel-shell {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+  }
+
   .shim-service-carousel {
     max-width: 1040px;
     margin-inline: auto;

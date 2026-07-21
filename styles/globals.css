@@ -296,6 +296,22 @@ input {
   word-break: keep-all;
 }
 
+[data-theme="dark"] .daily-quote {
+  border-color: rgba(139, 210, 189, 0.2);
+  background:
+    linear-gradient(135deg, rgba(139, 210, 189, 0.12), rgba(22, 33, 31, 0.74)),
+    var(--panel-clear);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
+}
+
+[data-theme="dark"] .daily-quote strong {
+  color: #b7e3d6;
+}
+
+[data-theme="dark"] .daily-quote p {
+  color: #edf5f1;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

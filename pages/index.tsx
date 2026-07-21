@@ -26,23 +26,24 @@ type HomePageProps = {
 const services = [
   {
     name: "SHIM Test",
-    description: "감정, 관계, 사고 패턴을 다루는 AI 심리검사 라인업",
+    description: "AI 심리검사로 감정, 관계, 사고 패턴을 빠르게 이해합니다.",
     href: "/shim-test",
     icon: ClipboardCheck,
     status: "OPEN",
-    action: "검사 라인업 보기"
+    action: "검사 시작",
+    highlight: "오늘 추천: 감정·회복 유형 테스트"
   },
   {
     name: "SHIM Diary",
-    description: "오늘의 감정을 기록하면 AI가 작은 위로와 한줄 코멘트를 남겨드립니다.",
+    description: "오늘의 감정을 기록하면 AI가 작은 위로를 남겨드립니다.",
     href: "/diary",
     icon: BookOpenText,
     status: "OPEN",
-    action: "감정 기록하기"
+    action: "감정 기록"
   },
   {
     name: "SHIM Report",
-    description: "지난 한 달 동안 내 감정이 어떻게 달라졌는지 AI가 분석해드립니다.",
+    description: "지난 감정의 흐름을 AI가 월간 리포트로 정리합니다.",
     href: "/report",
     icon: BarChart3,
     status: "준비중",
@@ -50,7 +51,7 @@ const services = [
   },
   {
     name: "SHIM Care",
-    description: "AI가 추천하는 나만의 회복 루틴",
+    description: "AI가 추천하는 나만의 회복 루틴을 제안합니다.",
     href: "/care",
     icon: HeartPulse,
     status: "준비중",
@@ -58,7 +59,7 @@ const services = [
   },
   {
     name: "SHIM Talk",
-    description: "대화형 감정 정리와 자기이해 코칭",
+    description: "대화로 감정을 정리하고 자기이해 질문을 이어갑니다.",
     href: "/talk",
     icon: MessageCircleHeart,
     status: "준비중",
@@ -68,33 +69,20 @@ const services = [
 
 const platformPoints = [
   {
-    title: "자가진단이 아닌 자기이해",
-    description: "결과를 단정하지 않고 감정, 관계, 사고 습관을 돌아볼 수 있는 언어로 정리합니다.",
+    title: "심리검사가 아닌 자기이해",
+    description: "결과를 단정하지 않고 나를 이해하는 언어로 감정과 관계를 정리합니다.",
     icon: ShieldCheck
   },
   {
-    title: "검사 후 행동까지 연결",
-    description: "점수만 보여주는 방식보다 회복 루틴과 다음 질문으로 이어지는 경험을 지향합니다.",
+    title: "결과보다 변화",
+    description: "점수에서 끝나지 않고 오늘 시도할 수 있는 회복 행동으로 이어집니다.",
     icon: LineChart
   },
   {
-    title: "관계와 정서 영역 확장",
-    description: "연애, 이상형, 대인관계, 고기능 우울감처럼 실제 고민과 가까운 주제를 순차 공개합니다.",
+    title: "AI와 함께 성장",
+    description: "검사, 기록, 리포트를 연결해 나를 조금씩 더 정확하게 알아갑니다.",
     icon: Users
   }
-];
-
-const dailyQuotes = [
-  "오늘의 작은 숨 고르기가 내일의 나를 조금 더 편안하게 합니다.",
-  "괜찮아지는 일은 늘 조용히, 그러나 분명히 시작됩니다.",
-  "마음이 느린 날에도 당신은 충분히 잘 지나가고 있습니다.",
-  "잠시 멈추는 것도 나를 지키는 하나의 방법입니다.",
-  "오늘의 나를 다그치기보다 살짝 안아주는 쪽을 선택해보세요.",
-  "흔들리는 마음에도 방향을 잃지 않는 힘이 남아 있습니다.",
-  "완벽하지 않아도 괜찮습니다. 지금의 속도도 당신의 속도입니다.",
-  "마음이 무거운 날에는 작은 친절 하나가 충분한 시작입니다.",
-  "나를 이해하려는 마음은 이미 회복의 첫 문장입니다.",
-  "오늘 하루를 버텨낸 것만으로도 마음은 제 몫을 해냈습니다."
 ];
 
 const moodOptions = [
@@ -113,46 +101,13 @@ const moodOptions = [
 ];
 
 const INITIAL_MOOD_COUNT = 6;
-const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-function getDailyQuote(date = new Date()) {
-  const kstDate = new Date(date.getTime() + KST_OFFSET_MS);
-  const year = kstDate.getUTCFullYear();
-  const month = kstDate.getUTCMonth();
-  const day = kstDate.getUTCDate();
-  const dayIndex = Math.floor((Date.UTC(year, month, day) - Date.UTC(2026, 0, 1)) / DAY_MS);
-  return dailyQuotes[Math.abs(dayIndex) % dailyQuotes.length];
-}
-
-function getMsUntilNextKstMidnight(date = new Date()) {
-  const kstDate = new Date(date.getTime() + KST_OFFSET_MS);
-  const year = kstDate.getUTCFullYear();
-  const month = kstDate.getUTCMonth();
-  const day = kstDate.getUTCDate();
-  const nextKstMidnightUtc = Date.UTC(year, month, day + 1) - KST_OFFSET_MS;
-  return Math.max(nextKstMidnightUtc - date.getTime(), 1000);
-}
 
 export default function HomePage({ theme, toggleTheme }: HomePageProps) {
   const isDark = theme === "dark";
-  const [dailyQuote, setDailyQuote] = useState(dailyQuotes[0]);
   const [recommendedCount, setRecommendedCount] = useState<number | null>(null);
   const [selectedMood, setSelectedMood] = useState(moodOptions[0]);
   const [showAllMoods, setShowAllMoods] = useState(false);
   const visibleMoodOptions = showAllMoods ? moodOptions : moodOptions.slice(0, INITIAL_MOOD_COUNT);
-
-  useEffect(() => {
-    let timeoutId: number;
-
-    function refreshQuote() {
-      setDailyQuote(getDailyQuote());
-      timeoutId = window.setTimeout(refreshQuote, getMsUntilNextKstMidnight());
-    }
-
-    refreshQuote();
-    return () => window.clearTimeout(timeoutId);
-  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -216,46 +171,64 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
           </button>
         </header>
 
-        <section className="hero home-hero">
+        <section className="home-redesign-hero" aria-label="SHIM AI 소개">
           <div className="home-hero-copy">
             <span className="eyebrow">
               <Sparkles size={15} aria-hidden="true" />
-              AI 심리검사 기반 자기이해 플랫폼
+              AI 자기이해 플랫폼
             </span>
             <h1>
               <span>AI와 함께</span>
               <span>나를 더 정확하게 이해하세요.</span>
             </h1>
-            <div className="daily-quote" aria-label="오늘의 AI 한줄">
-              <strong>🌿 오늘의 AI 한줄</strong>
-              <p>{dailyQuote}</p>
-            </div>
             <p>
-              AI 심리테스트와 감정기록을 통해 나를 이해하고 성장하는 자기이해 플랫폼입니다.
-              오늘의 감정부터 관계 패턴까지 쉽게 기록하고 해석해보세요.
+              SHIM은 AI 심리테스트와 감정기록을 통해 지금의 감정, 관계, 회복 패턴을 더 쉽게 이해하도록 돕습니다.
             </p>
+            <Link href="/shim-test">
+              <a className="primary-button home-hero-cta">
+                지금 시작하기
+                <ArrowRight size={18} aria-hidden="true" />
+              </a>
+            </Link>
           </div>
         </section>
 
-        <section className="today-recommendation" aria-label="오늘의 추천">
-          <div>
-            <span className="recommendation-kicker">오늘의 추천</span>
-            <h2>감정·회복 유형 테스트</h2>
-            <p>지금 내 감정 조절 패턴과 회복 방식을 12문항으로 확인해보세요.</p>
-            <div className="recommendation-meta" aria-label="추천 테스트 정보">
-              <span>3분</span>
-              <span>12문항</span>
-              <span>
-                {recommendedCount === null ? "참여 수 집계 중" : `${recommendedCount.toLocaleString("ko-KR")}명 참여`}
-              </span>
-            </div>
+        <section className="service-slider-section" aria-label="SHIM 서비스">
+          <div className="section-heading">
+            <span>SHIM Services</span>
+            <h2>필요한 방식으로 자기이해를 시작하세요</h2>
           </div>
-          <Link href="/mind">
-            <a className="primary-button">
-              테스트 시작
-              <ArrowRight size={18} aria-hidden="true" />
-            </a>
-          </Link>
+          <div className="service-card-slider" role="list">
+            {services.map((service) => {
+              const Icon = service.icon;
+              const isOpen = service.status === "OPEN";
+              return (
+                <Link href={service.href} key={service.name}>
+                  <a className={`service-slide-card ${isOpen ? "is-open" : "is-planned"}`} role="listitem">
+                    <span className="service-slide-icon">
+                      <Icon size={22} aria-hidden="true" />
+                    </span>
+                    <em className={`service-status ${isOpen ? "is-open" : "is-planned"}`}>{service.status}</em>
+                    <strong>{service.name}</strong>
+                    <p>{service.description}</p>
+                    {service.highlight ? (
+                      <div className="service-card-recommendation" aria-label="SHIM Test 추천">
+                        <span>{service.highlight}</span>
+                        <small>
+                          3분 · 12문항 ·{" "}
+                          {recommendedCount === null ? "참여 수 집계 중" : `${recommendedCount.toLocaleString("ko-KR")}명 참여`}
+                        </small>
+                      </div>
+                    ) : null}
+                    <span className="service-slide-action">
+                      {service.action}
+                      <ArrowRight size={17} aria-hidden="true" />
+                    </span>
+                  </a>
+                </Link>
+              );
+            })}
+          </div>
         </section>
 
         <section className="mood-check" aria-label="오늘의 기분 선택">
@@ -296,33 +269,12 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
           </Link>
         </section>
 
-        <section className="service-map service-map-priority" aria-label="SHIM AI 서비스 선택">
-          <div className="section-heading service-heading">
-            <span>Service Map</span>
-            <h2>필요한 방식으로 자기이해를 시작하세요</h2>
+        <section className="philosophy-section" aria-label="SHIM AI 서비스 철학">
+          <div className="section-heading">
+            <span>Our Philosophy</span>
+            <h2>나를 판단하지 않고 이해하는 방식</h2>
           </div>
-          {services.map((service) => {
-            const Icon = service.icon;
-            return (
-              <Link href={service.href} key={service.name}>
-                <a className="service-map-item">
-                  <span className="service-map-icon">
-                    <Icon size={22} aria-hidden="true" />
-                  </span>
-                  <strong>{service.name}</strong>
-                  <em className={`service-status ${service.status === "OPEN" ? "is-open" : "is-planned"}`}>{service.status}</em>
-                  <span className="service-map-description">{service.description}</span>
-                  <span className={`service-map-action ${service.status === "OPEN" ? "is-open" : "is-planned"}`}>
-                    {service.action}
-                    <ArrowRight size={20} />
-                  </span>
-                </a>
-              </Link>
-            );
-          })}
-        </section>
-
-        <section className="platform-grid" aria-label="SHIM AI 서비스 방향">
+          <div className="platform-grid">
           {platformPoints.map((point) => {
             const Icon = point.icon;
             return (
@@ -335,6 +287,7 @@ export default function HomePage({ theme, toggleTheme }: HomePageProps) {
               </article>
             );
           })}
+          </div>
         </section>
 
         <p className="notice">{disclaimer}</p>

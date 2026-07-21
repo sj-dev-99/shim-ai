@@ -157,6 +157,52 @@ input {
   justify-items: start;
 }
 
+.home-redesign-hero {
+  display: grid;
+  align-items: center;
+  min-height: 58vh;
+  padding: 54px 0 34px;
+}
+
+.home-redesign-hero .home-hero-copy {
+  max-width: 720px;
+  gap: 18px;
+}
+
+.home-redesign-hero h1 {
+  max-width: 560px;
+  margin: 0;
+  color: var(--ink);
+  font-size: 37px;
+  line-height: 1.14;
+  letter-spacing: 0;
+  word-break: keep-all;
+}
+
+.home-redesign-hero h1 span {
+  display: block;
+}
+
+.home-redesign-hero h1 span:last-child {
+  font-size: 31px;
+  line-height: 1.2;
+}
+
+.home-redesign-hero p {
+  max-width: 520px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+.home-hero-cta {
+  margin-top: 4px;
+  min-width: 168px;
+}
+
 .home-hero-copy p:not(.daily-quote) {
   max-width: 760px;
 }
@@ -526,6 +572,128 @@ input {
   border: 1px solid var(--line);
   background: var(--panel-soft);
   color: var(--muted);
+}
+
+.service-slider-section {
+  display: grid;
+  gap: 16px;
+  margin: 0 -18px 34px;
+  padding: 4px 0 0 18px;
+}
+
+.service-slider-section .section-heading {
+  padding-right: 18px;
+}
+
+.service-slider-section .section-heading h2 {
+  max-width: 320px;
+}
+
+.service-card-slider {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(264px, 78vw);
+  gap: 12px;
+  overflow-x: auto;
+  padding: 0 18px 12px 0;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.service-card-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.service-slide-card {
+  position: relative;
+  display: grid;
+  min-height: 258px;
+  align-content: start;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+  box-shadow: 0 16px 34px rgba(38, 56, 50, 0.08);
+  scroll-snap-align: start;
+}
+
+.service-slide-card.is-open:first-child {
+  background:
+    linear-gradient(150deg, rgba(111, 183, 162, 0.16), transparent 46%),
+    var(--panel-soft);
+}
+
+.service-slide-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--selected-panel);
+  color: var(--teal);
+}
+
+.service-slide-card .service-status {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  margin: 0;
+}
+
+.service-slide-card strong {
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: 23px;
+  line-height: 1.18;
+}
+
+.service-slide-card p {
+  min-height: 46px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+
+.service-card-recommendation {
+  display: grid;
+  gap: 5px;
+  margin-top: 2px;
+  padding: 11px 12px;
+  border-radius: 8px;
+  background: rgba(184, 77, 61, 0.1);
+}
+
+.service-card-recommendation span {
+  color: var(--coral);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.service-card-recommendation small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.service-slide-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin-top: auto;
+  color: var(--teal);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.philosophy-section {
+  display: grid;
+  gap: 14px;
+  margin: 32px 0 0;
 }
 
 .test-category {
@@ -2323,6 +2491,11 @@ input {
     line-height: 1.08;
   }
 
+  .home-redesign-hero h1 {
+    font-size: 48px;
+    line-height: 1.1;
+  }
+
   .home-hero-copy h1 span:last-child {
     font-size: inherit;
     line-height: inherit;
@@ -2543,6 +2716,36 @@ input {
     line-height: 1.04;
   }
 
+  .home-redesign-hero {
+    min-height: 62vh;
+    padding: 82px 0 56px;
+  }
+
+  .home-redesign-hero h1 {
+    max-width: 760px;
+    font-size: 68px;
+    line-height: 1.04;
+  }
+
+  .home-redesign-hero p {
+    font-size: 18px;
+  }
+
+  .service-slider-section {
+    margin-right: -30px;
+    margin-left: -30px;
+    padding-left: 30px;
+  }
+
+  .service-slider-section .section-heading {
+    padding-right: 30px;
+  }
+
+  .service-card-slider {
+    grid-auto-columns: minmax(300px, 32vw);
+    padding-right: 30px;
+  }
+
   .insight-band {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -2609,6 +2812,27 @@ input {
 }
 
 @media (min-width: 980px) {
+  .service-slider-section {
+    margin-right: 0;
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  .service-slider-section .section-heading {
+    padding-right: 0;
+  }
+
+  .service-card-slider {
+    grid-auto-flow: initial;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .service-slide-card {
+    min-height: 286px;
+  }
+
   .service-map {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }

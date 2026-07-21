@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { type KeyboardEvent, type PointerEvent, type UIEvent, useMemo, useRef, useState } from "react";
 import {
-  ArrowLeft,
   ArrowRight,
   BarChart3,
   BookOpenText,
@@ -115,7 +114,7 @@ function ServiceDetail({ service, recommendedCount }: { service: HomeService; re
   const isOpen = service.status === "OPEN";
 
   return (
-    <section className={`shim-service-detail accent-${service.accent}`} aria-live="polite">
+    <section className={`shim-service-detail accent-${service.accent}`} aria-live="polite" key={service.id}>
       <div className="shim-detail-heading">
         <span className="shim-detail-icon">
           <Icon size={20} aria-hidden="true" />
@@ -308,17 +307,10 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       <div className="shim-section-heading">
         <span>SHIM SERVICES</span>
         <h2 id="shim-service-title">나에게 맞는 방식으로 시작하세요</h2>
+        <p>하나의 검사로 끝나지 않고 기록과 변화까지 이어집니다.</p>
       </div>
 
       <div className="shim-carousel-shell">
-        <button
-          aria-label="이전 서비스 보기"
-          className="shim-carousel-nav is-prev"
-          onClick={() => selectService(activeIndex - 1)}
-          type="button"
-        >
-          <ArrowLeft size={17} aria-hidden="true" />
-        </button>
         <div
           aria-label="SHIM 서비스 카드 슬라이더"
           className={`shim-service-carousel ${isMouseDragging ? "is-dragging" : ""}`}
@@ -346,14 +338,6 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
             />
           ))}
         </div>
-        <button
-          aria-label="다음 서비스 보기"
-          className="shim-carousel-nav is-next"
-          onClick={() => selectService(activeIndex + 1)}
-          type="button"
-        >
-          <ArrowRight size={17} aria-hidden="true" />
-        </button>
       </div>
 
       <div className="shim-carousel-pagination" aria-label="서비스 카드 위치">
@@ -368,7 +352,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
         ))}
       </div>
 
-      <ServiceDetail recommendedCount={recommendedCount} service={activeService} />
+      <ServiceDetail key={activeService.id} recommendedCount={recommendedCount} service={activeService} />
     </section>
   );
 }
@@ -419,6 +403,7 @@ export function HomeFooter() {
       <span>shim.ai</span>
       <span>{BETA_VERSION}</span>
       <small>© {year} SHIM AI. Self-understanding, gently structured.</small>
+      <strong className="shim-footer-tagline">Understand yourself, gently.</strong>
     </footer>
   );
 }

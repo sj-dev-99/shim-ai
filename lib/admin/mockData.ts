@@ -106,6 +106,14 @@ export const mockAdminData: AdminData = {
   ],
   versionNotes: [
     {
+      id: "ver-006",
+      version: "Beta v0.2.0",
+      title: "모바일 퍼스트 메인페이지 전면 리디자인",
+      description:
+        "SHIM.AI를 AI 자기이해 플랫폼으로 더 빠르게 이해할 수 있도록 Hero, 서비스 카드 슬라이더, 선택형 상세 CTA, Methodology 섹션 중심으로 메인페이지 구조를 재설계했습니다.",
+      createdAt: "2026-07-21T10:30:00+09:00"
+    },
+    {
       id: "ver-005",
       version: "Beta v0.1.4",
       title: "검사 시작 화면 간소화 및 결과 리포트 보강",

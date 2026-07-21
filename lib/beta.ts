@@ -1,7 +1,7 @@
 export const BETA_VERSION =
   process.env.NEXT_PUBLIC_BETA_VERSION && process.env.NEXT_PUBLIC_BETA_VERSION.trim().length > 0
     ? process.env.NEXT_PUBLIC_BETA_VERSION
-    : "Beta v0.1.4";
+    : "Beta v0.2.0";
 
 export type BetaEventType =
   | "page_view"

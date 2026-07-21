@@ -15,7 +15,7 @@ SHIM AI는 감정 인식, 자기이해, 회복 습관을 돕는 AI 기반 베타
 - 라이트/다크 모드
 - 피드백 보내기, 오류 신고, 만족도, 테스트 종료 의견 수집
 - 비밀번호 기반 관리자 페이지: `/admin`
-- 현재 버전: `Beta v0.1.4`
+- 현재 버전: `Beta v0.2.0`
 
 ## 로컬 실행
 
@@ -39,7 +39,7 @@ npm run build
 실제 환경변수 파일은 GitHub에 올리지 않습니다. 로컬에서는 `.env.example`을 참고해 `.env.local`을 만들고, Vercel에서는 Project Settings > Environment Variables에 등록합니다.
 
 ```bash
-NEXT_PUBLIC_BETA_VERSION="Beta v0.1.4"
+NEXT_PUBLIC_BETA_VERSION="Beta v0.2.0"
 BETA_EVENT_WEBHOOK_URL=""
 BETA_EVENT_WEBHOOK_TOKEN=""
 ADMIN_PASSWORD=""

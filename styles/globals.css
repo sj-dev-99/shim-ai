@@ -293,6 +293,15 @@ input {
   scroll-snap-type: x mandatory;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shim-service-carousel:active {
+  cursor: grabbing;
 }
 
 .shim-service-carousel::-webkit-scrollbar {

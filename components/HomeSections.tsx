@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { KeyboardEvent, UIEvent, useMemo, useRef, useState } from "react";
+import { type KeyboardEvent, type PointerEvent, type UIEvent, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -166,6 +166,14 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const rafRef = useRef<number | null>(null);
+  const dragStateRef = useRef({
+    isDragging: false,
+    pointerId: -1,
+    startX: 0,
+    scrollLeft: 0,
+    didMove: false
+  });
+  const suppressClickRef = useRef(false);
   const activeService = homeServices[activeIndex] || homeServices[0];
 
   function selectService(index: number, shouldScroll = true) {
@@ -207,6 +215,59 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   function handleScroll(_event: UIEvent<HTMLDivElement>) {
     if (rafRef.current) window.cancelAnimationFrame(rafRef.current);
     rafRef.current = window.requestAnimationFrame(syncActiveCard);
+  }
+
+  function handleCardSelect(index: number) {
+    if (suppressClickRef.current) return;
+    selectService(index);
+  }
+
+  function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    dragStateRef.current = {
+      isDragging: true,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      scrollLeft: scroller.scrollLeft,
+      didMove: false
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    const scroller = scrollerRef.current;
+    const dragState = dragStateRef.current;
+    if (!scroller || !dragState.isDragging || dragState.pointerId !== event.pointerId) return;
+
+    const deltaX = event.clientX - dragState.startX;
+    if (Math.abs(deltaX) > 4) {
+      dragState.didMove = true;
+      suppressClickRef.current = true;
+    }
+
+    scroller.scrollLeft = dragState.scrollLeft - deltaX;
+  }
+
+  function finishPointerDrag(event: PointerEvent<HTMLDivElement>) {
+    const dragState = dragStateRef.current;
+    if (!dragState.isDragging || dragState.pointerId !== event.pointerId) return;
+
+    dragStateRef.current = {
+      isDragging: false,
+      pointerId: -1,
+      startX: 0,
+      scrollLeft: 0,
+      didMove: false
+    };
+
+    if (dragState.didMove) {
+      syncActiveCard();
+      window.setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 0);
+    }
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -251,6 +312,11 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
           aria-label="SHIM 서비스 카드 슬라이더"
           className="shim-service-carousel"
           onKeyDown={handleKeyDown}
+          onPointerCancel={finishPointerDrag}
+          onPointerDown={handlePointerDown}
+          onPointerLeave={finishPointerDrag}
+          onPointerMove={handlePointerMove}
+          onPointerUp={finishPointerDrag}
           onScroll={handleScroll}
           ref={scrollerRef}
           role="tablist"
@@ -261,7 +327,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
               index={index}
               isActive={index === activeIndex}
               key={service.id}
-              onSelect={selectService}
+              onSelect={handleCardSelect}
               service={service}
               setCardRef={(node) => {
                 cardRefs.current[index] = node;

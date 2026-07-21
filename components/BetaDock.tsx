@@ -1,5 +1,5 @@
 import { AlertTriangle, MessageCircle, Send, X } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { BETA_VERSION, BetaEventType, submitBetaEvent } from "../lib/beta";
 
 type ModalType = Extract<BetaEventType, "feedback" | "bug_report">;
@@ -23,6 +23,20 @@ export default function BetaDock() {
   const [score, setScore] = useState(5);
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [isOpen, setIsOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    function handleScroll() {
+      setIsVisible(window.scrollY > 220);
+    }
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -58,7 +72,7 @@ export default function BetaDock() {
 
   return (
     <>
-      <div className="beta-dock" aria-label="베타 테스트 도구">
+      <div className={`beta-dock ${isVisible || isOpen ? "is-visible" : ""}`} aria-label="베타 테스트 도구">
         {isOpen ? (
           <div className="beta-menu" role="menu" aria-label="피드백 메뉴">
             <button className="beta-action" onClick={() => open("feedback")} role="menuitem" type="button">

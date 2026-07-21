@@ -163,9 +163,10 @@ function ServiceDetail({ service, recommendedCount }: { service: HomeService; re
 
 export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isMouseDragging, setIsMouseDragging] = useState(false);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const rafRef = useRef<number | null>(null);
+  const scrollEndTimerRef = useRef<number | null>(null);
   const dragStateRef = useRef({
     isDragging: false,
     pointerId: -1,
@@ -189,9 +190,9 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     }
   }
 
-  function syncActiveCard() {
+  function getClosestCardIndex() {
     const scroller = scrollerRef.current;
-    if (!scroller) return;
+    if (!scroller) return activeIndex;
 
     const center = scroller.getBoundingClientRect().left + scroller.clientWidth / 2;
     let nextIndex = activeIndex;
@@ -207,14 +208,19 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       }
     });
 
+    return nextIndex;
+  }
+
+  function syncActiveCard() {
+    const nextIndex = getClosestCardIndex();
     if (nextIndex !== activeIndex) {
       setActiveIndex(nextIndex);
     }
   }
 
   function handleScroll(_event: UIEvent<HTMLDivElement>) {
-    if (rafRef.current) window.cancelAnimationFrame(rafRef.current);
-    rafRef.current = window.requestAnimationFrame(syncActiveCard);
+    if (scrollEndTimerRef.current) window.clearTimeout(scrollEndTimerRef.current);
+    scrollEndTimerRef.current = window.setTimeout(syncActiveCard, 90);
   }
 
   function handleCardSelect(index: number) {
@@ -223,6 +229,8 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   }
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    if (event.pointerType !== "mouse") return;
+
     const scroller = scrollerRef.current;
     if (!scroller) return;
 
@@ -233,6 +241,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       scrollLeft: scroller.scrollLeft,
       didMove: false
     };
+    setIsMouseDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
   }
 
@@ -253,6 +262,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   function finishPointerDrag(event: PointerEvent<HTMLDivElement>) {
     const dragState = dragStateRef.current;
     if (!dragState.isDragging || dragState.pointerId !== event.pointerId) return;
+    const didMove = dragState.didMove;
 
     dragStateRef.current = {
       isDragging: false,
@@ -261,9 +271,10 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       scrollLeft: 0,
       didMove: false
     };
+    setIsMouseDragging(false);
 
-    if (dragState.didMove) {
-      syncActiveCard();
+    if (didMove) {
+      selectService(getClosestCardIndex());
       window.setTimeout(() => {
         suppressClickRef.current = false;
       }, 0);
@@ -310,7 +321,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
         </button>
         <div
           aria-label="SHIM 서비스 카드 슬라이더"
-          className="shim-service-carousel"
+          className={`shim-service-carousel ${isMouseDragging ? "is-dragging" : ""}`}
           onKeyDown={handleKeyDown}
           onPointerCancel={finishPointerDrag}
           onPointerDown={handlePointerDown}

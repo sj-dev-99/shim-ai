@@ -291,9 +291,10 @@ input {
   padding: 8px max(20px, calc((100vw - var(--service-card-width)) / 2)) 20px;
   scroll-padding-inline: max(20px, calc((100vw - var(--service-card-width)) / 2));
   scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
-  touch-action: pan-y;
+  touch-action: pan-x pan-y;
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
@@ -302,6 +303,11 @@ input {
 
 .shim-service-carousel:active {
   cursor: grabbing;
+}
+
+.shim-service-carousel.is-dragging {
+  scroll-behavior: auto;
+  scroll-snap-type: none;
 }
 
 .shim-service-carousel::-webkit-scrollbar {
@@ -443,7 +449,28 @@ input {
 }
 
 .shim-carousel-nav {
-  display: none;
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(231, 222, 208, 0.86);
+  border-radius: 999px;
+  background: rgba(255, 252, 244, 0.86);
+  color: var(--ink);
+  box-shadow: 0 10px 24px rgba(78, 67, 52, 0.1);
+  transform: translateY(-50%);
+  backdrop-filter: blur(10px);
+}
+
+.shim-carousel-nav.is-prev {
+  left: 10px;
+}
+
+.shim-carousel-nav.is-next {
+  right: 10px;
 }
 
 .shim-carousel-pagination {

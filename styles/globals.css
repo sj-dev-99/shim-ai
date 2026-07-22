@@ -315,6 +315,10 @@ input {
   scroll-snap-type: none;
 }
 
+.shim-service-carousel.is-dragging .shim-service-card {
+  will-change: transform;
+}
+
 .shim-service-carousel::-webkit-scrollbar {
   display: none;
 }

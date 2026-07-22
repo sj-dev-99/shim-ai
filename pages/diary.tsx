@@ -30,19 +30,19 @@ type DiaryEntry = {
 const DIARY_STORAGE_KEY = "shim_ai_diary_entries";
 const DIARY_PREVIEW_MESSAGE = "오늘의 감정을 적으면 shim.ai가 한 줄로 마음을 정리해드릴게요.";
 
-const emotionOptions: Array<{ id: DiaryEmotion; label: string; tone: string }> = [
-  { id: "good", label: "좋음", tone: "기분 좋은 장면이 남은 하루" },
-  { id: "calm", label: "평온함", tone: "마음이 비교적 안정된 하루" },
-  { id: "warm", label: "따뜻함", tone: "작은 온기와 다정함이 남은 하루" },
-  { id: "excited", label: "설렘", tone: "기대와 활력이 올라온 하루" },
-  { id: "okay", label: "괜찮음", tone: "조금은 나아진 하루" },
-  { id: "neutral", label: "무덤덤함", tone: "감정이 크게 흔들리지 않은 하루" },
-  { id: "mixed", label: "복잡함", tone: "여러 생각과 감정이 엉킨 하루" },
-  { id: "anxious", label: "불안함", tone: "생각이 많고 긴장된 하루" },
-  { id: "sad", label: "슬픔", tone: "마음이 조금 가라앉은 하루" },
-  { id: "angry", label: "화남", tone: "마음의 경계가 건드려진 하루" },
-  { id: "tired", label: "지침", tone: "에너지가 많이 쓰인 하루" },
-  { id: "lonely", label: "외로움", tone: "혼자라는 감각이 커진 하루" }
+const emotionOptions: Array<{ id: DiaryEmotion; icon: string; label: string; tone: string }> = [
+  { id: "good", icon: "😊", label: "좋아요", tone: "기분 좋은 장면이 오래 남은 하루" },
+  { id: "calm", icon: "🌿", label: "평온해요", tone: "마음이 잔잔하고 안정된 하루" },
+  { id: "warm", icon: "🤍", label: "따뜻해요", tone: "작은 다정함이 오래 기억되는 하루" },
+  { id: "excited", icon: "✨", label: "설레요", tone: "기대와 생기가 조용히 피어난 하루" },
+  { id: "okay", icon: "🙂", label: "괜찮아요", tone: "크게 흔들리지 않고 지나온 하루" },
+  { id: "neutral", icon: "▫️", label: "무덤덤해요", tone: "선명하지 않아도 그대로 괜찮은 하루" },
+  { id: "mixed", icon: "🌀", label: "복잡해요", tone: "여러 마음이 겹쳐 정리가 필요한 하루" },
+  { id: "anxious", icon: "☁️", label: "불안해요", tone: "생각이 많아 마음이 긴장된 하루" },
+  { id: "sad", icon: "💧", label: "슬퍼요", tone: "마음 한쪽이 조용히 가라앉은 하루" },
+  { id: "angry", icon: "⚡", label: "화나요", tone: "내 경계가 건드려진 것 같은 하루" },
+  { id: "tired", icon: "🌙", label: "지쳤어요", tone: "에너지를 천천히 아껴야 하는 하루" },
+  { id: "lonely", icon: "🫧", label: "외로워요", tone: "연결이 조금 더 필요하게 느껴진 하루" }
 ];
 
 const commentByEmotion: Record<DiaryEmotion, string[]> = {
@@ -239,18 +239,30 @@ export default function DiaryPage() {
             <fieldset className="diary-emotion-field">
               <legend>오늘의 감정상태</legend>
               <div className="diary-emotion-grid">
-                {emotionOptions.map((option) => (
-                  <button
-                    aria-pressed={emotion === option.id}
-                    className="diary-emotion-button"
-                    key={option.id}
-                    onClick={() => setEmotion(option.id)}
-                    type="button"
-                  >
-                    <strong>{option.label}</strong>
-                    <span>{option.tone}</span>
-                  </button>
-                ))}
+                {emotionOptions.map((option) => {
+                  const isSelected = emotion === option.id;
+
+                  return (
+                    <button
+                      aria-pressed={isSelected}
+                      className="diary-emotion-button"
+                      key={option.id}
+                      onClick={() => setEmotion(option.id)}
+                      type="button"
+                    >
+                      <span className="diary-emotion-head">
+                        <span className="diary-emotion-icon" aria-hidden="true">
+                          {option.icon}
+                        </span>
+                        <strong>{option.label}</strong>
+                        <span className="diary-emotion-check" aria-hidden="true">
+                          ✓
+                        </span>
+                      </span>
+                      <span className="diary-emotion-tone">{option.tone}</span>
+                    </button>
+                  );
+                })}
               </div>
             </fieldset>
 

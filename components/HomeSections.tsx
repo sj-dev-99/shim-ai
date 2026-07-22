@@ -293,13 +293,18 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     setActiveIndex(nextRealIndex);
 
     if (shouldScroll) {
-      isProgrammaticScrollRef.current = true;
-      if (loopResetTimerRef.current) window.clearTimeout(loopResetTimerRef.current);
-      scrollCardIntoView(nextIndex);
-      finishProgrammaticScroll(nextIndex);
-      if (nextIndex < loopOffset || nextIndex >= loopOffset * 2) {
-        loopResetTimerRef.current = window.setTimeout(() => resetLoopPosition(nextIndex), 1100);
-      }
+      scrollToVirtualService(nextIndex);
+    }
+  }
+
+  function scrollToVirtualService(index: number) {
+    const nextIndex = Math.max(0, Math.min(loopedServices.length - 1, index));
+    isProgrammaticScrollRef.current = true;
+    if (loopResetTimerRef.current) window.clearTimeout(loopResetTimerRef.current);
+    scrollCardIntoView(nextIndex);
+    finishProgrammaticScroll(nextIndex);
+    if (nextIndex < loopOffset || nextIndex >= loopOffset * 2) {
+      loopResetTimerRef.current = window.setTimeout(() => resetLoopPosition(nextIndex), 1100);
     }
   }
 
@@ -491,7 +496,8 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
 
     if (didMove) {
       const nextIndex = getTargetIndexFromGesture(dragState, event.clientX);
-      window.requestAnimationFrame(() => selectVirtualService(nextIndex));
+      selectVirtualService(nextIndex, false);
+      window.requestAnimationFrame(() => scrollToVirtualService(nextIndex));
       window.setTimeout(() => {
         suppressClickRef.current = false;
       }, 120);

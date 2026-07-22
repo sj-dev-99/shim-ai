@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { type KeyboardEvent, type PointerEvent, type UIEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type KeyboardEvent, type PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   BarChart3,
@@ -167,18 +167,25 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   const [activeVirtualIndex, setActiveVirtualIndex] = useState(loopOffset);
   const [isCarouselReady, setIsCarouselReady] = useState(false);
   const [isMouseDragging, setIsMouseDragging] = useState(false);
-  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const scrollEndTimerRef = useRef<number | null>(null);
-  const programmaticScrollFrameRef = useRef<number | null>(null);
-  const loopResetTimerRef = useRef<number | null>(null);
-  const isProgrammaticScrollRef = useRef(false);
+  const animationFrameRef = useRef<number | null>(null);
+  const activeVirtualIndexRef = useRef(loopOffset);
+  const activeIndexRef = useRef(0);
+  const currentXRef = useRef(0);
+  const metricsRef = useRef({
+    cardWidth: 0,
+    gap: 4,
+    viewportWidth: 0,
+    step: 0
+  });
   const dragStateRef = useRef({
     isDragging: false,
     pointerId: -1,
     startX: 0,
     startY: 0,
-    scrollLeft: 0,
+    startTranslateX: 0,
     startVirtualIndex: loopOffset,
     didMove: false,
     isHorizontal: false,
@@ -190,148 +197,148 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   const activeService = homeServices[activeIndex] || homeServices[0];
 
   useEffect(() => {
+    activeVirtualIndexRef.current = activeVirtualIndex;
+  }, [activeVirtualIndex]);
+
+  useEffect(() => {
+    activeIndexRef.current = activeIndex;
+  }, [activeIndex]);
+
+  useEffect(() => {
     let frame = 0;
-    let attempts = 0;
 
-    function placeInitialCard() {
-      const didScroll = scrollCardIntoView(loopOffset, "auto");
-      if (didScroll || attempts > 8) {
-        setIsCarouselReady(true);
-        return;
-      }
-
-      attempts += 1;
-      frame = window.requestAnimationFrame(placeInitialCard);
+    function setupCarousel() {
+      measureCarousel();
+      setTrackX(getTranslateForIndex(loopOffset));
+      setIsCarouselReady(true);
     }
 
-    frame = window.requestAnimationFrame(placeInitialCard);
-    return () => window.cancelAnimationFrame(frame);
+    frame = window.requestAnimationFrame(setupCarousel);
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", handleResize);
+      cancelAnimation();
+      const dragState = dragStateRef.current;
+      if (dragState.rafId) window.cancelAnimationFrame(dragState.rafId);
+    };
   }, [loopOffset]);
 
   function normalizeIndex(index: number) {
     return ((index % homeServices.length) + homeServices.length) % homeServices.length;
   }
 
-  function scrollCardIntoView(index: number, behavior: ScrollBehavior = "smooth") {
-    const scroller = scrollerRef.current;
-    const card = cardRefs.current[index];
-    if (!scroller || !card) return false;
+  function measureCarousel() {
+    const viewport = carouselRef.current;
+    const track = trackRef.current;
+    const card = cardRefs.current[activeVirtualIndexRef.current] || cardRefs.current[loopOffset];
+    if (!viewport || !track || !card) return;
 
-    const left = getCardScrollLeft(index);
-    if (left === null) return false;
-    if (behavior === "auto") {
-      const previousBehavior = scroller.style.scrollBehavior;
-      scroller.style.scrollBehavior = "auto";
-      scroller.scrollLeft = left;
-      window.requestAnimationFrame(() => {
-        scroller.style.scrollBehavior = previousBehavior;
-      });
-      return true;
+    const trackStyles = window.getComputedStyle(track);
+    const gap = Number.parseFloat(trackStyles.columnGap || trackStyles.gap || "4") || 4;
+    const cardWidth = card.getBoundingClientRect().width;
+    const viewportWidth = viewport.getBoundingClientRect().width;
+    metricsRef.current = {
+      cardWidth,
+      gap,
+      viewportWidth,
+      step: cardWidth + gap
+    };
+  }
+
+  function handleResize() {
+    measureCarousel();
+    setTrackX(getTranslateForIndex(activeVirtualIndexRef.current));
+  }
+
+  function getTranslateForIndex(index: number) {
+    const { cardWidth, viewportWidth, step } = metricsRef.current;
+    if (!cardWidth || !viewportWidth || !step) return 0;
+    return (viewportWidth - cardWidth) / 2 - index * step;
+  }
+
+  function setTrackX(value: number) {
+    currentXRef.current = value;
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translate3d(${value}px, 0, 0)`;
     }
-
-    scroller.scrollTo({ behavior, left });
-    return true;
   }
 
-  function getCardScrollLeft(index: number) {
-    const scroller = scrollerRef.current;
-    const card = cardRefs.current[index];
-    if (!scroller || !card) return null;
-
-    return card.offsetLeft - (scroller.clientWidth - card.offsetWidth) / 2;
-  }
-
-  function getCardStep() {
-    const current = cardRefs.current[activeVirtualIndex];
-    const next = cardRefs.current[activeVirtualIndex + 1] || cardRefs.current[activeVirtualIndex - 1];
-    if (current && next) return Math.abs(next.offsetLeft - current.offsetLeft);
-    if (current) return current.offsetWidth + 4;
-    return (scrollerRef.current?.clientWidth || 375) * 0.74;
-  }
-
-  function finishProgrammaticScroll(targetIndex: number) {
-    const scroller = scrollerRef.current;
-    const targetLeft = getCardScrollLeft(targetIndex);
-    if (!scroller || targetLeft === null) {
-      isProgrammaticScrollRef.current = false;
-      return;
+  function cancelAnimation() {
+    if (animationFrameRef.current) {
+      window.cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
     }
-    const settledScroller = scroller;
-    const settledTargetLeft = targetLeft;
-
-    if (programmaticScrollFrameRef.current) window.cancelAnimationFrame(programmaticScrollFrameRef.current);
-
-    let stableFrames = 0;
-    const startedAt = window.performance.now();
-
-    function checkSettled(now: number) {
-      const currentLeft = settledScroller.scrollLeft;
-      const isNearTarget = Math.abs(currentLeft - settledTargetLeft) < 1.2;
-      stableFrames = isNearTarget ? stableFrames + 1 : 0;
-
-      if (stableFrames >= 4 || now - startedAt > 950) {
-        if (!isNearTarget) {
-          scrollCardIntoView(targetIndex, "auto");
-        }
-        isProgrammaticScrollRef.current = false;
-        if (targetIndex < loopOffset || targetIndex >= loopOffset * 2) {
-          resetLoopPosition(targetIndex);
-        }
-        return;
-      }
-
-      programmaticScrollFrameRef.current = window.requestAnimationFrame(checkSettled);
-    }
-
-    programmaticScrollFrameRef.current = window.requestAnimationFrame(checkSettled);
   }
 
-  function selectVirtualService(index: number, shouldScroll = true) {
+  function getNearestVirtualIndex(realIndex: number) {
+    const current = activeVirtualIndexRef.current;
+    const candidates = [realIndex, loopOffset + realIndex, loopOffset * 2 + realIndex];
+    return candidates.reduce((nearest, candidate) =>
+      Math.abs(candidate - current) < Math.abs(nearest - current) ? candidate : nearest
+    );
+  }
+
+  function selectVirtualService(index: number, shouldAnimate = true, initialVelocity = 0) {
     const nextIndex = Math.max(0, Math.min(loopedServices.length - 1, index));
     const nextRealIndex = normalizeIndex(nextIndex);
+    activeVirtualIndexRef.current = nextIndex;
+    activeIndexRef.current = nextRealIndex;
     setActiveVirtualIndex(nextIndex);
     setActiveIndex(nextRealIndex);
 
-    if (shouldScroll) {
-      scrollToVirtualService(nextIndex);
+    if (shouldAnimate) {
+      animateToVirtualIndex(nextIndex, initialVelocity);
+    } else {
+      setTrackX(getTranslateForIndex(nextIndex));
+      normalizeLoopPosition(nextIndex);
     }
   }
 
-  function scrollToVirtualService(index: number) {
-    const nextIndex = Math.max(0, Math.min(loopedServices.length - 1, index));
-    isProgrammaticScrollRef.current = true;
-    if (loopResetTimerRef.current) window.clearTimeout(loopResetTimerRef.current);
-    scrollCardIntoView(nextIndex);
-    finishProgrammaticScroll(nextIndex);
-    if (nextIndex < loopOffset || nextIndex >= loopOffset * 2) {
-      loopResetTimerRef.current = window.setTimeout(() => resetLoopPosition(nextIndex), 1100);
+  function animateToVirtualIndex(index: number, initialVelocity = 0) {
+    const targetX = getTranslateForIndex(index);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    cancelAnimation();
+
+    if (reduceMotion) {
+      setTrackX(targetX);
+      normalizeLoopPosition(index);
+      return;
     }
+
+    let position = currentXRef.current;
+    let velocity = initialVelocity * 1000;
+    let lastTime = window.performance.now();
+    const stiffness = 420;
+    const damping = 38;
+
+    function tick(now: number) {
+      const dt = Math.min(0.032, Math.max(0.001, (now - lastTime) / 1000));
+      lastTime = now;
+
+      const displacement = position - targetX;
+      const acceleration = -stiffness * displacement - damping * velocity;
+      velocity += acceleration * dt;
+      position += velocity * dt;
+      setTrackX(position);
+
+      if (Math.abs(position - targetX) < 0.35 && Math.abs(velocity) < 6) {
+        setTrackX(targetX);
+        animationFrameRef.current = null;
+        normalizeLoopPosition(index);
+        return;
+      }
+
+      animationFrameRef.current = window.requestAnimationFrame(tick);
+    }
+
+    animationFrameRef.current = window.requestAnimationFrame(tick);
   }
 
   function selectService(index: number, shouldScroll = true) {
     const nextRealIndex = normalizeIndex(index);
-    selectVirtualService(loopOffset + nextRealIndex, shouldScroll);
-  }
-
-  function getClosestVirtualIndex() {
-    const scroller = scrollerRef.current;
-    if (!scroller) return activeVirtualIndex;
-
-    const center = scroller.getBoundingClientRect().left + scroller.clientWidth / 2;
-    let nextIndex = activeVirtualIndex;
-    let nextDistance = Number.POSITIVE_INFINITY;
-
-    cardRefs.current.forEach((card, index) => {
-      if (!card) return;
-      const rect = card.getBoundingClientRect();
-      const distance = Math.abs(rect.left + rect.width / 2 - center);
-      if (distance < nextDistance) {
-        nextDistance = distance;
-        nextIndex = index;
-      }
-    });
-
-    return nextIndex;
+    selectVirtualService(getNearestVirtualIndex(nextRealIndex), shouldScroll);
   }
 
   function getReleaseVelocity(samples: Array<{ time: number; x: number }>) {
@@ -346,60 +353,31 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   function getTargetIndexFromGesture(dragState: typeof dragStateRef.current, endX: number) {
     const distance = endX - dragState.startX;
     const absDistance = Math.abs(distance);
-    const step = getCardStep();
+    const step = metricsRef.current.step || 1;
     const velocity = getReleaseVelocity(dragState.samples);
     const absVelocity = Math.abs(velocity);
     const direction = distance < 0 || (absDistance < 1 && velocity < 0) ? 1 : -1;
-    const quietDistance = step * 0.12;
-    const quietVelocity = 0.28;
+    const quietDistance = 8;
+    const quietVelocity = 0.08;
 
     if (absDistance < quietDistance && absVelocity < quietVelocity) {
-      return getClosestVirtualIndex();
+      return dragState.startVirtualIndex;
     }
 
-    const distanceSlides = absDistance / step;
-    const velocitySlides = (absVelocity * 260) / step;
-    const rawSlides = distanceSlides + velocitySlides;
-    const slideCount = Math.max(1, Math.min(3, Math.round(rawSlides)));
+    const projectedDistance = absDistance + absVelocity * 230;
+    const slideCount = Math.max(1, Math.min(3, Math.round(projectedDistance / step)));
 
     return dragState.startVirtualIndex + direction * slideCount;
   }
 
-  function resetLoopPosition(virtualIndex: number) {
+  function normalizeLoopPosition(virtualIndex: number) {
     const realIndex = normalizeIndex(virtualIndex);
     const centeredIndex = loopOffset + realIndex;
     if (centeredIndex === virtualIndex) return;
 
-    isProgrammaticScrollRef.current = true;
-    if (loopResetTimerRef.current) window.clearTimeout(loopResetTimerRef.current);
-    scrollCardIntoView(centeredIndex, "auto");
+    activeVirtualIndexRef.current = centeredIndex;
     setActiveVirtualIndex(centeredIndex);
-    window.setTimeout(() => {
-      isProgrammaticScrollRef.current = false;
-    }, 40);
-  }
-
-  function syncActiveCard() {
-    if (isProgrammaticScrollRef.current) return;
-
-    const nextVirtualIndex = getClosestVirtualIndex();
-    const nextRealIndex = normalizeIndex(nextVirtualIndex);
-    if (nextVirtualIndex !== activeVirtualIndex) {
-      setActiveVirtualIndex(nextVirtualIndex);
-    }
-    if (nextRealIndex !== activeIndex) {
-      setActiveIndex(nextRealIndex);
-    }
-
-    if (nextVirtualIndex < loopOffset || nextVirtualIndex >= loopOffset * 2) {
-      window.setTimeout(() => resetLoopPosition(nextVirtualIndex), 120);
-    }
-  }
-
-  function handleScroll(_event: UIEvent<HTMLDivElement>) {
-    if (isProgrammaticScrollRef.current) return;
-    if (scrollEndTimerRef.current) window.clearTimeout(scrollEndTimerRef.current);
-    scrollEndTimerRef.current = window.setTimeout(syncActiveCard, 90);
+    setTrackX(getTranslateForIndex(centeredIndex));
   }
 
   function handleCardSelect(index: number) {
@@ -408,11 +386,10 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   }
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
+    if (!carouselRef.current) return;
 
-    if (programmaticScrollFrameRef.current) window.cancelAnimationFrame(programmaticScrollFrameRef.current);
-    isProgrammaticScrollRef.current = false;
+    measureCarousel();
+    cancelAnimation();
 
     const now = window.performance.now();
     dragStateRef.current = {
@@ -420,8 +397,8 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      scrollLeft: scroller.scrollLeft,
-      startVirtualIndex: activeVirtualIndex,
+      startTranslateX: currentXRef.current,
+      startVirtualIndex: activeVirtualIndexRef.current,
       didMove: false,
       isHorizontal: false,
       rafId: 0,
@@ -433,9 +410,8 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   }
 
   function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
-    const scroller = scrollerRef.current;
     const dragState = dragStateRef.current;
-    if (!scroller || !dragState.isDragging || dragState.pointerId !== event.pointerId) return;
+    if (!dragState.isDragging || dragState.pointerId !== event.pointerId) return;
 
     const deltaX = event.clientX - dragState.startX;
     const deltaY = event.clientY - dragState.startY;
@@ -466,7 +442,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       dragState.rafId = window.requestAnimationFrame(() => {
         const latestDragState = dragStateRef.current;
         if (latestDragState.isDragging) {
-          scroller.scrollLeft = latestDragState.scrollLeft - latestDragState.pendingDeltaX;
+          setTrackX(latestDragState.startTranslateX + latestDragState.pendingDeltaX);
         }
         latestDragState.rafId = 0;
       });
@@ -478,13 +454,16 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     if (!dragState.isDragging || dragState.pointerId !== event.pointerId) return;
     const didMove = dragState.didMove;
     if (dragState.rafId) window.cancelAnimationFrame(dragState.rafId);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
 
     dragStateRef.current = {
       isDragging: false,
       pointerId: -1,
       startX: 0,
       startY: 0,
-      scrollLeft: 0,
+      startTranslateX: 0,
       startVirtualIndex: loopOffset,
       didMove: false,
       isHorizontal: false,
@@ -496,23 +475,25 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
 
     if (didMove) {
       const nextIndex = getTargetIndexFromGesture(dragState, event.clientX);
-      selectVirtualService(nextIndex, false);
-      window.requestAnimationFrame(() => scrollToVirtualService(nextIndex));
+      const velocity = getReleaseVelocity(dragState.samples);
+      selectVirtualService(nextIndex, true, velocity);
       window.setTimeout(() => {
         suppressClickRef.current = false;
       }, 120);
+    } else {
+      suppressClickRef.current = false;
     }
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key === "ArrowRight") {
       event.preventDefault();
-      selectVirtualService(activeVirtualIndex + 1);
+      selectVirtualService(activeVirtualIndexRef.current + 1);
     }
 
     if (event.key === "ArrowLeft") {
       event.preventDefault();
-      selectVirtualService(activeVirtualIndex - 1);
+      selectVirtualService(activeVirtualIndexRef.current - 1);
     }
 
     if (event.key === "Home") {
@@ -543,26 +524,26 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
           onKeyDown={handleKeyDown}
           onPointerCancel={finishPointerDrag}
           onPointerDown={handlePointerDown}
-          onPointerLeave={finishPointerDrag}
           onPointerMove={handlePointerMove}
           onPointerUp={finishPointerDrag}
-          onScroll={handleScroll}
-          ref={scrollerRef}
+          ref={carouselRef}
           role="tablist"
           tabIndex={0}
         >
-          {loopedServices.map((service, index) => (
-            <ServiceCard
-              index={index}
-              isActive={index === activeVirtualIndex}
-              key={`${service.id}-${index}`}
-              onSelect={handleCardSelect}
-              service={service}
-              setCardRef={(node) => {
-                cardRefs.current[index] = node;
-              }}
-            />
-          ))}
+          <div className="shim-service-track" ref={trackRef}>
+            {loopedServices.map((service, index) => (
+              <ServiceCard
+                index={index}
+                isActive={index === activeVirtualIndex}
+                key={`${service.id}-${index}`}
+                onSelect={handleCardSelect}
+                service={service}
+                setCardRef={(node) => {
+                  cardRefs.current[index] = node;
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
 

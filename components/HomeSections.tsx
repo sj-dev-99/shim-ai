@@ -165,22 +165,41 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   const loopedServices = useMemo(() => [...homeServices, ...homeServices, ...homeServices], []);
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeVirtualIndex, setActiveVirtualIndex] = useState(loopOffset);
+  const [isCarouselReady, setIsCarouselReady] = useState(false);
   const [isMouseDragging, setIsMouseDragging] = useState(false);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const scrollEndTimerRef = useRef<number | null>(null);
+  const programmaticScrollTimerRef = useRef<number | null>(null);
+  const isProgrammaticScrollRef = useRef(false);
   const dragStateRef = useRef({
     isDragging: false,
     pointerId: -1,
     startX: 0,
+    startY: 0,
     scrollLeft: 0,
+    startVirtualIndex: loopOffset,
     didMove: false
   });
   const suppressClickRef = useRef(false);
   const activeService = homeServices[activeIndex] || homeServices[0];
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => scrollCardIntoView(loopOffset, "auto"));
+    let frame = 0;
+    let attempts = 0;
+
+    function placeInitialCard() {
+      const didScroll = scrollCardIntoView(loopOffset, "auto");
+      if (didScroll || attempts > 8) {
+        setIsCarouselReady(true);
+        return;
+      }
+
+      attempts += 1;
+      frame = window.requestAnimationFrame(placeInitialCard);
+    }
+
+    frame = window.requestAnimationFrame(placeInitialCard);
     return () => window.cancelAnimationFrame(frame);
   }, [loopOffset]);
 
@@ -191,13 +210,21 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   function scrollCardIntoView(index: number, behavior: ScrollBehavior = "smooth") {
     const scroller = scrollerRef.current;
     const card = cardRefs.current[index];
-    if (!scroller || !card) return;
+    if (!scroller || !card) return false;
 
     const left = card.offsetLeft - (scroller.clientWidth - card.offsetWidth) / 2;
-    scroller.scrollTo({
-      behavior,
-      left
-    });
+    if (behavior === "auto") {
+      const previousBehavior = scroller.style.scrollBehavior;
+      scroller.style.scrollBehavior = "auto";
+      scroller.scrollLeft = left;
+      window.requestAnimationFrame(() => {
+        scroller.style.scrollBehavior = previousBehavior;
+      });
+      return true;
+    }
+
+    scroller.scrollTo({ behavior, left });
+    return true;
   }
 
   function selectVirtualService(index: number, shouldScroll = true) {
@@ -207,7 +234,15 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     setActiveIndex(nextRealIndex);
 
     if (shouldScroll) {
+      isProgrammaticScrollRef.current = true;
+      if (programmaticScrollTimerRef.current) window.clearTimeout(programmaticScrollTimerRef.current);
       scrollCardIntoView(nextIndex);
+      programmaticScrollTimerRef.current = window.setTimeout(() => {
+        isProgrammaticScrollRef.current = false;
+        if (nextIndex < loopOffset || nextIndex >= loopOffset * 2) {
+          resetLoopPosition(nextIndex);
+        }
+      }, 760);
     }
   }
 
@@ -242,11 +277,17 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     const centeredIndex = loopOffset + realIndex;
     if (centeredIndex === virtualIndex) return;
 
+    isProgrammaticScrollRef.current = true;
     scrollCardIntoView(centeredIndex, "auto");
     setActiveVirtualIndex(centeredIndex);
+    window.setTimeout(() => {
+      isProgrammaticScrollRef.current = false;
+    }, 40);
   }
 
   function syncActiveCard() {
+    if (isProgrammaticScrollRef.current) return;
+
     const nextVirtualIndex = getClosestVirtualIndex();
     const nextRealIndex = normalizeIndex(nextVirtualIndex);
     if (nextVirtualIndex !== activeVirtualIndex) {
@@ -262,6 +303,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   }
 
   function handleScroll(_event: UIEvent<HTMLDivElement>) {
+    if (isProgrammaticScrollRef.current) return;
     if (scrollEndTimerRef.current) window.clearTimeout(scrollEndTimerRef.current);
     scrollEndTimerRef.current = window.setTimeout(syncActiveCard, 90);
   }
@@ -272,8 +314,6 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   }
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
-    if (event.pointerType !== "mouse") return;
-
     const scroller = scrollerRef.current;
     if (!scroller) return;
 
@@ -281,7 +321,9 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       isDragging: true,
       pointerId: event.pointerId,
       startX: event.clientX,
+      startY: event.clientY,
       scrollLeft: scroller.scrollLeft,
+      startVirtualIndex: activeVirtualIndex,
       didMove: false
     };
     setIsMouseDragging(true);
@@ -294,11 +336,15 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     if (!scroller || !dragState.isDragging || dragState.pointerId !== event.pointerId) return;
 
     const deltaX = event.clientX - dragState.startX;
+    const deltaY = event.clientY - dragState.startY;
     if (Math.abs(deltaX) > 4) {
       dragState.didMove = true;
       suppressClickRef.current = true;
     }
 
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      event.preventDefault();
+    }
     scroller.scrollLeft = dragState.scrollLeft - deltaX;
   }
 
@@ -311,13 +357,25 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       isDragging: false,
       pointerId: -1,
       startX: 0,
+      startY: 0,
       scrollLeft: 0,
+      startVirtualIndex: loopOffset,
       didMove: false
     };
     setIsMouseDragging(false);
 
     if (didMove) {
-      selectVirtualService(getClosestVirtualIndex());
+      const scroller = scrollerRef.current;
+      const card = cardRefs.current[dragState.startVirtualIndex];
+      const deltaX = event.clientX - dragState.startX;
+      const oneStepThreshold = Math.max(46, (card?.offsetWidth || scroller?.clientWidth || 320) * 0.36);
+      const isShortSwipe = Math.abs(deltaX) < oneStepThreshold;
+      const direction = deltaX < 0 ? 1 : -1;
+      const nextIndex = isShortSwipe
+        ? dragState.startVirtualIndex + direction
+        : getClosestVirtualIndex();
+
+      selectVirtualService(nextIndex);
       window.setTimeout(() => {
         suppressClickRef.current = false;
       }, 0);
@@ -357,7 +415,9 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       <div className="shim-carousel-shell">
         <div
           aria-label="SHIM 서비스 카드 슬라이더"
-          className={`shim-service-carousel ${isMouseDragging ? "is-dragging" : ""}`}
+          className={`shim-service-carousel ${isCarouselReady ? "is-ready" : ""} ${
+            isMouseDragging ? "is-dragging" : ""
+          }`}
           onKeyDown={handleKeyDown}
           onPointerCancel={finishPointerDrag}
           onPointerDown={handlePointerDown}

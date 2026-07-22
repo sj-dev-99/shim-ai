@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { type KeyboardEvent, type PointerEvent, type UIEvent, useMemo, useRef, useState } from "react";
+import { type KeyboardEvent, type PointerEvent, type UIEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   BarChart3,
@@ -63,7 +63,7 @@ export function HeroSection({ isDark, toggleTheme }: HeroSectionProps) {
           <span>나를 더 정확하게 이해하세요.</span>
         </h1>
         <p>
-          감정 기록, AI 심리테스트, 맥락 기반 해석을 연결해 지금의 나를 더 차분하게 이해하도록 돕습니다.
+          감정 기록과 AI 심리테스트를 연결해 지금의 나를 더 차분하게 이해하도록 돕습니다.
         </p>
       </div>
     </section>
@@ -161,7 +161,10 @@ function ServiceDetail({ service, recommendedCount }: { service: HomeService; re
 }
 
 export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
+  const loopOffset = homeServices.length;
+  const loopedServices = useMemo(() => [...homeServices, ...homeServices, ...homeServices], []);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [activeVirtualIndex, setActiveVirtualIndex] = useState(loopOffset);
   const [isMouseDragging, setIsMouseDragging] = useState(false);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -176,25 +179,49 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   const suppressClickRef = useRef(false);
   const activeService = homeServices[activeIndex] || homeServices[0];
 
-  function selectService(index: number, shouldScroll = true) {
-    const nextIndex = Math.max(0, Math.min(homeServices.length - 1, index));
-    setActiveIndex(nextIndex);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => scrollCardIntoView(loopOffset, "auto"));
+    return () => window.cancelAnimationFrame(frame);
+  }, [loopOffset]);
+
+  function normalizeIndex(index: number) {
+    return ((index % homeServices.length) + homeServices.length) % homeServices.length;
+  }
+
+  function scrollCardIntoView(index: number, behavior: ScrollBehavior = "smooth") {
+    const scroller = scrollerRef.current;
+    const card = cardRefs.current[index];
+    if (!scroller || !card) return;
+
+    const left = card.offsetLeft - (scroller.clientWidth - card.offsetWidth) / 2;
+    scroller.scrollTo({
+      behavior,
+      left
+    });
+  }
+
+  function selectVirtualService(index: number, shouldScroll = true) {
+    const nextIndex = Math.max(0, Math.min(loopedServices.length - 1, index));
+    const nextRealIndex = normalizeIndex(nextIndex);
+    setActiveVirtualIndex(nextIndex);
+    setActiveIndex(nextRealIndex);
 
     if (shouldScroll) {
-      cardRefs.current[nextIndex]?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center"
-      });
+      scrollCardIntoView(nextIndex);
     }
   }
 
-  function getClosestCardIndex() {
+  function selectService(index: number, shouldScroll = true) {
+    const nextRealIndex = normalizeIndex(index);
+    selectVirtualService(loopOffset + nextRealIndex, shouldScroll);
+  }
+
+  function getClosestVirtualIndex() {
     const scroller = scrollerRef.current;
-    if (!scroller) return activeIndex;
+    if (!scroller) return activeVirtualIndex;
 
     const center = scroller.getBoundingClientRect().left + scroller.clientWidth / 2;
-    let nextIndex = activeIndex;
+    let nextIndex = activeVirtualIndex;
     let nextDistance = Number.POSITIVE_INFINITY;
 
     cardRefs.current.forEach((card, index) => {
@@ -210,10 +237,27 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     return nextIndex;
   }
 
+  function resetLoopPosition(virtualIndex: number) {
+    const realIndex = normalizeIndex(virtualIndex);
+    const centeredIndex = loopOffset + realIndex;
+    if (centeredIndex === virtualIndex) return;
+
+    scrollCardIntoView(centeredIndex, "auto");
+    setActiveVirtualIndex(centeredIndex);
+  }
+
   function syncActiveCard() {
-    const nextIndex = getClosestCardIndex();
-    if (nextIndex !== activeIndex) {
-      setActiveIndex(nextIndex);
+    const nextVirtualIndex = getClosestVirtualIndex();
+    const nextRealIndex = normalizeIndex(nextVirtualIndex);
+    if (nextVirtualIndex !== activeVirtualIndex) {
+      setActiveVirtualIndex(nextVirtualIndex);
+    }
+    if (nextRealIndex !== activeIndex) {
+      setActiveIndex(nextRealIndex);
+    }
+
+    if (nextVirtualIndex < loopOffset || nextVirtualIndex >= loopOffset * 2) {
+      window.setTimeout(() => resetLoopPosition(nextVirtualIndex), 120);
     }
   }
 
@@ -224,7 +268,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
 
   function handleCardSelect(index: number) {
     if (suppressClickRef.current) return;
-    selectService(index);
+    selectVirtualService(index);
   }
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
@@ -273,7 +317,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     setIsMouseDragging(false);
 
     if (didMove) {
-      selectService(getClosestCardIndex());
+      selectVirtualService(getClosestVirtualIndex());
       window.setTimeout(() => {
         suppressClickRef.current = false;
       }, 0);
@@ -283,22 +327,22 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key === "ArrowRight") {
       event.preventDefault();
-      selectService(activeIndex + 1);
+      selectVirtualService(activeVirtualIndex + 1);
     }
 
     if (event.key === "ArrowLeft") {
       event.preventDefault();
-      selectService(activeIndex - 1);
+      selectVirtualService(activeVirtualIndex - 1);
     }
 
     if (event.key === "Home") {
       event.preventDefault();
-      selectService(0);
+      selectVirtualService(loopOffset);
     }
 
     if (event.key === "End") {
       event.preventDefault();
-      selectService(homeServices.length - 1);
+      selectVirtualService(loopOffset + homeServices.length - 1);
     }
   }
 
@@ -325,11 +369,11 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
           role="tablist"
           tabIndex={0}
         >
-          {homeServices.map((service, index) => (
+          {loopedServices.map((service, index) => (
             <ServiceCard
               index={index}
-              isActive={index === activeIndex}
-              key={service.id}
+              isActive={index === activeVirtualIndex}
+              key={`${service.id}-${index}`}
               onSelect={handleCardSelect}
               service={service}
               setCardRef={(node) => {

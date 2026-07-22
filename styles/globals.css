@@ -145,6 +145,289 @@ input {
   font-weight: 700;
 }
 
+.auth-shell {
+  max-width: 620px;
+}
+
+.auth-card {
+  display: grid;
+  gap: 18px;
+  margin-top: 34px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-soft);
+  box-shadow: var(--shadow);
+}
+
+.auth-card h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 28px;
+  line-height: 1.24;
+  word-break: keep-all;
+}
+
+.auth-form {
+  display: grid;
+  gap: 14px;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 7px;
+}
+
+.auth-form label > span,
+.account-panel span,
+.policy-content > span {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form input[type="text"] {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.auth-form input:focus {
+  border-color: var(--teal-strong);
+  box-shadow: 0 0 0 3px rgba(111, 183, 162, 0.18);
+}
+
+.auth-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 54px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--teal-strong);
+  color: var(--teal-ink);
+  font-size: 15px;
+  font-weight: 900;
+  box-shadow: 0 14px 30px rgba(47, 111, 101, 0.16);
+}
+
+.auth-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+.auth-resend-button {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-clear);
+  color: var(--teal);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.auth-resend-button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.auth-message {
+  margin: 0;
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-clear);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+
+.auth-message.is-success {
+  border-color: rgba(47, 119, 108, 0.28);
+  background: var(--selected-panel);
+  color: var(--teal);
+}
+
+.auth-message.is-error {
+  border-color: rgba(169, 103, 88, 0.28);
+  background: rgba(169, 103, 88, 0.1);
+  color: var(--coral);
+}
+
+.auth-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  color: var(--teal);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.auth-check-list {
+  display: grid;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-clear);
+}
+
+.auth-check-list label {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 9px;
+  align-items: start;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.auth-check-list input {
+  margin-top: 2px;
+  accent-color: var(--teal-strong);
+}
+
+.auth-check-list a {
+  color: var(--teal);
+  font-weight: 900;
+}
+
+.auth-check-list b {
+  color: var(--coral);
+  font-size: 12px;
+}
+
+.auth-callback-card {
+  justify-items: start;
+}
+
+.auth-callback-card h1,
+.policy-content h2 {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.auth-callback-card p,
+.policy-content p,
+.policy-content li,
+.account-panel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+.account-panel,
+.account-settings-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.account-panel > div,
+.account-settings-panel > section,
+.account-settings-panel > form {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-clear);
+}
+
+.account-panel strong {
+  color: var(--ink);
+  font-size: 16px;
+  word-break: break-all;
+}
+
+.account-logout {
+  width: 100%;
+}
+
+.account-settings-panel label {
+  display: grid;
+  gap: 7px;
+}
+
+.account-settings-panel input[type="text"],
+.account-settings-panel input[type="password"] {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  outline: none;
+}
+
+.account-settings-panel input:focus {
+  border-color: var(--teal-strong);
+  box-shadow: 0 0 0 3px rgba(111, 183, 162, 0.18);
+}
+
+.account-toggle-row {
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+}
+
+.account-toggle-row input {
+  accent-color: var(--teal-strong);
+}
+
+.account-danger-zone {
+  border-color: rgba(169, 103, 88, 0.28) !important;
+  background: rgba(169, 103, 88, 0.08) !important;
+}
+
+.account-delete-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--coral);
+  color: var(--primary-ink);
+  font-weight: 900;
+}
+
+.account-delete-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.policy-content {
+  display: grid;
+  gap: 13px;
+}
+
+.policy-content ul {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding-left: 20px;
+}
+
 .shim-home-shell {
   --home-side-padding: 20px;
   --service-card-width: min(72vw, 300px);
@@ -2224,6 +2507,60 @@ input {
   align-items: start;
 }
 
+.diary-status,
+.diary-login-panel,
+.diary-migration-panel {
+  margin: 0 0 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-clear);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.diary-status.is-success {
+  border-color: rgba(47, 119, 108, 0.28);
+  background: var(--selected-panel);
+  color: var(--teal);
+}
+
+.diary-status.is-error {
+  border-color: rgba(169, 103, 88, 0.3);
+  background: rgba(169, 103, 88, 0.1);
+  color: var(--coral);
+}
+
+.diary-login-panel,
+.diary-migration-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.diary-login-panel strong,
+.diary-migration-panel strong {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.diary-login-panel p,
+.diary-migration-panel p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.62;
+}
+
+.diary-login-panel > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .diary-writer,
 .diary-history {
   display: grid;
@@ -2382,6 +2719,13 @@ input {
   box-shadow: 0 0 0 3px rgba(111, 183, 162, 0.18);
 }
 
+.diary-loading {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+}
+
 .diary-comment-preview {
   display: grid;
   grid-template-columns: 22px 1fr;
@@ -2453,10 +2797,10 @@ input {
   position: relative;
   display: grid;
   gap: 9px;
-  padding: 14px 44px 14px 14px;
+  padding: 14px;
 }
 
-.diary-entry-card div {
+.diary-entry-card > div:first-child {
   display: grid;
   gap: 3px;
 }
@@ -2489,10 +2833,13 @@ input {
   line-height: 1.55;
 }
 
+.diary-entry-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
 .diary-delete-button {
-  position: absolute;
-  top: 12px;
-  right: 12px;
   display: grid;
   width: 30px;
   height: 30px;
@@ -2501,6 +2848,48 @@ input {
   border-radius: 8px;
   background: var(--panel);
   color: var(--muted);
+}
+
+.diary-edit-box {
+  display: grid;
+  gap: 8px;
+}
+
+.diary-edit-box label {
+  display: grid;
+  gap: 6px;
+}
+
+.diary-edit-box label span {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.diary-edit-box select,
+.diary-edit-box textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.6;
+}
+
+.diary-edit-box select {
+  cursor: pointer;
+}
+
+.diary-edit-box textarea {
+  resize: vertical;
+}
+
+.diary-edit-box > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .beta-dock {

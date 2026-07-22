@@ -345,6 +345,16 @@ create index if not exists beta_events_event_type_idx
 
 Vercel 환경변수에 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_BETA_EVENTS_TABLE`을 등록한 뒤 재배포하면 실제 저장이 시작됩니다.
 
+### 사용자 계정 및 Diary 클라우드 저장 기반
+
+SHIM Report 오픈 전 사용자 계정과 Diary 데이터 저장 기반을 준비하기 위해 Supabase Auth/Database Phase 1 구조를 추가했습니다.
+
+- 현재 단계: Supabase 클라이언트, 환경변수 구조, DB 스키마, RLS SQL, 인증 페이지, Diary Supabase 저장 전환, 계정 설정, 계정 삭제 API
+- 아직 미구현: SHIM Report 실제 데이터 분석 화면, 이메일 변경, 삭제 전 비밀번호 재인증 고도화
+- 설정 문서: [`docs/supabase-auth-diary-foundation.md`](docs/supabase-auth-diary-foundation.md)
+- 검증 체크리스트: [`docs/phase-5-validation-checklist.md`](docs/phase-5-validation-checklist.md)
+- SQL 파일: [`supabase/migrations/202607220001_auth_diary_foundation.sql`](supabase/migrations/202607220001_auth_diary_foundation.sql)
+
 ## 15. 의료·심리 관련 안내
 
 본 서비스는 의료 상담이나 진단을 제공하지 않으며, 자기이해와 자기성찰을 돕기 위한 참고용 콘텐츠입니다.

@@ -13,6 +13,13 @@ import {
 import { BETA_VERSION } from "../lib/beta";
 import { HomeService, homeServices, methodologyItems } from "../lib/homeContent";
 
+const DRAG_ACTIVATION_PX = 7;
+const DRAG_FOLLOW_RATIO = 0.96;
+const VELOCITY_WINDOW_MS = 110;
+const MAX_RELEASE_VELOCITY = 1.15;
+const VELOCITY_PROJECT_MS = 90;
+const MAX_SLIDES_PER_GESTURE = 2;
+
 const serviceIcons: Record<HomeService["id"], typeof ClipboardCheck> = {
   test: ClipboardCheck,
   diary: BookOpenText,
@@ -189,6 +196,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     startVirtualIndex: loopOffset,
     didMove: false,
     isHorizontal: false,
+    isVerticalCancelled: false,
     rafId: 0,
     pendingDeltaX: 0,
     samples: [] as Array<{ time: number; x: number }>
@@ -280,7 +288,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     );
   }
 
-  function selectVirtualService(index: number, shouldAnimate = true, initialVelocity = 0) {
+  function selectVirtualService(index: number, shouldAnimate = true) {
     const nextIndex = Math.max(0, Math.min(loopedServices.length - 1, index));
     const nextRealIndex = normalizeIndex(nextIndex);
     activeVirtualIndexRef.current = nextIndex;
@@ -289,14 +297,14 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     setActiveIndex(nextRealIndex);
 
     if (shouldAnimate) {
-      animateToVirtualIndex(nextIndex, initialVelocity);
+      animateToVirtualIndex(nextIndex);
     } else {
       setTrackX(getTranslateForIndex(nextIndex));
       normalizeLoopPosition(nextIndex);
     }
   }
 
-  function animateToVirtualIndex(index: number, initialVelocity = 0) {
+  function animateToVirtualIndex(index: number) {
     const targetX = getTranslateForIndex(index);
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     cancelAnimation();
@@ -307,23 +315,30 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       return;
     }
 
-    let position = currentXRef.current;
-    let velocity = initialVelocity * 1000;
-    let lastTime = window.performance.now();
-    const stiffness = 420;
-    const damping = 38;
+    const startX = currentXRef.current;
+    const distance = targetX - startX;
+    const absDistance = Math.abs(distance);
+    const step = metricsRef.current.step || absDistance || 1;
+    const distanceInSlides = Math.min(MAX_SLIDES_PER_GESTURE, absDistance / step);
+    const duration = Math.max(320, Math.min(650, 340 + distanceInSlides * 130));
+    const startTime = window.performance.now();
+
+    if (absDistance < 0.5) {
+      setTrackX(targetX);
+      normalizeLoopPosition(index);
+      return;
+    }
+
+    function easeGentleOut(progress: number) {
+      return Math.sin((progress * Math.PI) / 2);
+    }
 
     function tick(now: number) {
-      const dt = Math.min(0.032, Math.max(0.001, (now - lastTime) / 1000));
-      lastTime = now;
+      const progress = Math.min(1, (now - startTime) / duration);
+      const eased = easeGentleOut(progress);
+      setTrackX(startX + distance * eased);
 
-      const displacement = position - targetX;
-      const acceleration = -stiffness * displacement - damping * velocity;
-      velocity += acceleration * dt;
-      position += velocity * dt;
-      setTrackX(position);
-
-      if (Math.abs(position - targetX) < 0.35 && Math.abs(velocity) < 6) {
+      if (progress >= 1) {
         setTrackX(targetX);
         animationFrameRef.current = null;
         normalizeLoopPosition(index);
@@ -345,9 +360,11 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     const lastSample = samples[samples.length - 1];
     if (!lastSample) return 0;
 
-    const firstRecentSample = [...samples].reverse().find((sample) => lastSample.time - sample.time >= 60) || samples[0];
-    const duration = Math.max(1, lastSample.time - firstRecentSample.time);
-    return (lastSample.x - firstRecentSample.x) / duration;
+    const recentSamples = samples.filter((sample) => lastSample.time - sample.time <= VELOCITY_WINDOW_MS);
+    const firstRecentSample = recentSamples[0] || samples[0];
+    const duration = Math.max(16, lastSample.time - firstRecentSample.time);
+    const velocity = (lastSample.x - firstRecentSample.x) / duration;
+    return Math.max(-MAX_RELEASE_VELOCITY, Math.min(MAX_RELEASE_VELOCITY, velocity));
   }
 
   function getTargetIndexFromGesture(dragState: typeof dragStateRef.current, endX: number) {
@@ -357,17 +374,20 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     const velocity = getReleaseVelocity(dragState.samples);
     const absVelocity = Math.abs(velocity);
     const direction = distance < 0 || (absDistance < 1 && velocity < 0) ? 1 : -1;
-    const quietDistance = 8;
-    const quietVelocity = 0.08;
+    const quietDistance = step * 0.16;
+    const quietVelocity = 0.18;
 
     if (absDistance < quietDistance && absVelocity < quietVelocity) {
       return dragState.startVirtualIndex;
     }
 
-    const projectedDistance = absDistance + absVelocity * 230;
-    const slideCount = Math.max(1, Math.min(3, Math.round(projectedDistance / step)));
+    const projectedDistance = absDistance + absVelocity * VELOCITY_PROJECT_MS;
+    const wantsTwoSlides =
+      absDistance >= step * 1.26 || (absDistance >= step * 0.72 && absVelocity >= 0.72);
+    const wantsOneSlide = projectedDistance >= step * 0.2 || absVelocity >= 0.36;
+    const slideCount = wantsTwoSlides ? 2 : wantsOneSlide ? 1 : 0;
 
-    return dragState.startVirtualIndex + direction * slideCount;
+    return dragState.startVirtualIndex + direction * Math.min(MAX_SLIDES_PER_GESTURE, slideCount);
   }
 
   function normalizeLoopPosition(virtualIndex: number) {
@@ -401,12 +421,11 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       startVirtualIndex: activeVirtualIndexRef.current,
       didMove: false,
       isHorizontal: false,
+      isVerticalCancelled: false,
       rafId: 0,
       pendingDeltaX: 0,
       samples: [{ time: now, x: event.clientX }]
     };
-    setIsMouseDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
   }
 
   function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
@@ -418,11 +437,22 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     const absX = Math.abs(deltaX);
     const absY = Math.abs(deltaY);
 
-    if (!dragState.isHorizontal && absX > 8 && absX > absY * 1.12) {
-      dragState.isHorizontal = true;
+    if (dragState.isVerticalCancelled) return;
+
+    if (!dragState.isHorizontal && absY > DRAG_ACTIVATION_PX && absY > absX * 1.14) {
+      dragState.isVerticalCancelled = true;
+      return;
     }
 
-    if (dragState.isHorizontal && absX > 8) {
+    if (!dragState.isHorizontal && absX > DRAG_ACTIVATION_PX && absX > absY * 1.16) {
+      dragState.isHorizontal = true;
+      setIsMouseDragging(true);
+      if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
+    }
+
+    if (dragState.isHorizontal && absX > DRAG_ACTIVATION_PX) {
       dragState.didMove = true;
       suppressClickRef.current = true;
     }
@@ -435,8 +465,8 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
 
     const now = window.performance.now();
     dragState.samples.push({ time: now, x: event.clientX });
-    dragState.samples = dragState.samples.filter((sample) => now - sample.time <= 140);
-    dragState.pendingDeltaX = deltaX;
+    dragState.samples = dragState.samples.filter((sample) => now - sample.time <= VELOCITY_WINDOW_MS);
+    dragState.pendingDeltaX = deltaX * DRAG_FOLLOW_RATIO;
 
     if (!dragState.rafId) {
       dragState.rafId = window.requestAnimationFrame(() => {
@@ -467,6 +497,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       startVirtualIndex: loopOffset,
       didMove: false,
       isHorizontal: false,
+      isVerticalCancelled: false,
       rafId: 0,
       pendingDeltaX: 0,
       samples: []
@@ -475,8 +506,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
 
     if (didMove) {
       const nextIndex = getTargetIndexFromGesture(dragState, event.clientX);
-      const velocity = getReleaseVelocity(dragState.samples);
-      selectVirtualService(nextIndex, true, velocity);
+      selectVirtualService(nextIndex, true);
       window.setTimeout(() => {
         suppressClickRef.current = false;
       }, 120);

@@ -89,12 +89,14 @@ function ServiceCard({
   service,
   isActive,
   index,
+  position,
   setCardRef,
   onSelect
 }: {
   service: HomeService;
   isActive: boolean;
   index: number;
+  position: number;
   setCardRef: (node: HTMLButtonElement | null) => void;
   onSelect: (index: number) => void;
 }) {
@@ -102,7 +104,10 @@ function ServiceCard({
     <button
       aria-label={`${service.title} 서비스 보기`}
       aria-current={isActive ? "true" : undefined}
+      aria-hidden={!isActive}
+      aria-posinset={position}
       aria-selected={isActive}
+      aria-setsize={homeServices.length}
       className={`shim-service-card accent-${service.accent} ${isActive ? "is-active" : ""}`}
       onClick={() => onSelect(index)}
       ref={setCardRef}
@@ -609,6 +614,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
       <div className="shim-carousel-shell">
         <div
           aria-label="SHIM 서비스 카드 슬라이더"
+          aria-describedby="shim-service-carousel-status"
           className={`shim-service-carousel ${isCarouselReady ? "is-ready" : ""} ${
             isMouseDragging ? "is-dragging" : ""
           }`}
@@ -628,6 +634,7 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
                 isActive={index === activeVirtualIndex}
                 key={`${service.id}-${index}`}
                 onSelect={handleCardSelect}
+                position={(index % homeServices.length) + 1}
                 service={service}
                 setCardRef={(node) => {
                   cardRefs.current[index] = node;
@@ -637,6 +644,10 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
           </div>
         </div>
       </div>
+
+      <p className="visually-hidden" id="shim-service-carousel-status" aria-live="polite">
+        현재 {activeIndex + 1} / {homeServices.length}, {activeService.title} 카드가 선택되었습니다.
+      </p>
 
       <div className="shim-carousel-pagination" aria-label="서비스 카드 위치">
         {homeServices.map((service, index) => (

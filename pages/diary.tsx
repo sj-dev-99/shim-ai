@@ -14,7 +14,7 @@ import {
   Trash2,
   X
 } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../lib/auth/AuthProvider";
 import { disclaimer } from "../lib/data";
 import { getSupabaseBrowserClient } from "../lib/supabase/client";
@@ -36,6 +36,7 @@ type DiaryStatus = {
 const DIARY_STORAGE_KEY = "shim_ai_diary_entries";
 const DIARY_DRAFT_KEY = "shim_ai_diary_draft";
 const DIARY_PREVIEW_MESSAGE = "오늘의 감정을 적으면 shim.ai가 한 줄로 마음을 정리해드릴게요.";
+const DIARY_CONTENT_MAX_LENGTH = 800;
 
 const emotionOptions: Array<{ id: EmotionCode; icon: string; label: string; tone: string }> = [
   { id: "good", icon: "😊", label: "좋아요", tone: "기분 좋은 장면이 오래 남은 하루" },
@@ -125,37 +126,45 @@ function readLegacyDiaryEntries() {
   }
 }
 
-function saveDraft(emotion: EmotionCode, text: string) {
+function getDraftKey(userId?: string | null) {
+  return `${DIARY_DRAFT_KEY}:${userId || "guest"}`;
+}
+
+function saveDraft(userId: string | null | undefined, emotion: EmotionCode, text: string) {
   if (typeof window === "undefined") return;
 
   try {
-    window.localStorage.setItem(DIARY_DRAFT_KEY, JSON.stringify({ emotion, text }));
+    window.localStorage.setItem(
+      getDraftKey(userId),
+      JSON.stringify({ emotion, text, updatedAt: new Date().toISOString() })
+    );
   } catch {
     // Draft preservation is best-effort.
   }
 }
 
-function readDraft() {
+function readDraft(userId?: string | null) {
   if (typeof window === "undefined") return null;
 
   try {
-    const raw = window.localStorage.getItem(DIARY_DRAFT_KEY);
+    const raw = window.localStorage.getItem(getDraftKey(userId));
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as { emotion?: string; text?: string };
+    const parsed = JSON.parse(raw) as { emotion?: string; text?: string; updatedAt?: string };
     return {
       emotion: isDiaryEmotion(parsed.emotion) ? parsed.emotion : "calm",
-      text: typeof parsed.text === "string" ? parsed.text : ""
+      text: typeof parsed.text === "string" ? parsed.text : "",
+      updatedAt: typeof parsed.updatedAt === "string" ? parsed.updatedAt : null
     };
   } catch {
     return null;
   }
 }
 
-function clearDraft() {
+function clearDraft(userId?: string | null) {
   if (typeof window === "undefined") return;
 
   try {
-    window.localStorage.removeItem(DIARY_DRAFT_KEY);
+    window.localStorage.removeItem(getDraftKey(userId));
   } catch {
     // Non-critical cleanup.
   }
@@ -177,14 +186,19 @@ function createDiaryComment(emotion: EmotionCode, text: string) {
   return candidates[index];
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("ko-KR", {
+function formatEntryDate(entry: Pick<DiaryEntry, "entry_date" | "created_at">) {
+  const date = new Date(`${entry.entry_date}T00:00:00+09:00`);
+  const day = new Intl.DateTimeFormat("ko-KR", {
     month: "long",
     day: "numeric",
-    weekday: "short",
+    weekday: "short"
+  }).format(date);
+  const time = new Intl.DateTimeFormat("ko-KR", {
     hour: "2-digit",
     minute: "2-digit"
-  }).format(new Date(value));
+  }).format(new Date(entry.created_at));
+
+  return `${day} · ${time}`;
 }
 
 function getKoreaDateString(value = new Date()) {
@@ -210,17 +224,33 @@ export default function DiaryPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState("");
   const [editingEmotion, setEditingEmotion] = useState<EmotionCode | null>(null);
+  const [editingSaveId, setEditingSaveId] = useState<string | null>(null);
+  const [entryPendingDelete, setEntryPendingDelete] = useState<DiaryEntry | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const pendingSaveKeyRef = useRef<string | null>(null);
   const latestEntry = entries[0];
+  const currentEmotionLabel = getEmotionLabel(emotion);
+  const canSaveDiary = !isSaving;
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
 
   useEffect(() => {
-    const draft = readDraft();
+    setLegacyEntries(readLegacyDiaryEntries());
+  }, []);
+
+  useEffect(() => {
+    if (isAuthLoading) return;
+
+    const draft = readDraft(user?.id);
     if (draft) {
       setEmotion(draft.emotion);
       setText(draft.text);
+      return;
     }
-    setLegacyEntries(readLegacyDiaryEntries());
-  }, []);
+
+    const rawEmotion = Array.isArray(router.query.emotion) ? router.query.emotion[0] : router.query.emotion;
+    setEmotion(isDiaryEmotion(rawEmotion) ? rawEmotion : "calm");
+    setText("");
+  }, [isAuthLoading, router.query.emotion, user?.id]);
 
   useEffect(() => {
     const rawEmotion = Array.isArray(router.query.emotion) ? router.query.emotion[0] : router.query.emotion;
@@ -234,6 +264,8 @@ export default function DiaryPage() {
     if (!user) {
       setEntries([]);
       setIsLoadingEntries(false);
+      setEditingId(null);
+      setEntryPendingDelete(null);
       return;
     }
 
@@ -242,9 +274,9 @@ export default function DiaryPage() {
 
   useEffect(() => {
     if (text.trim()) {
-      saveDraft(emotion, text);
+      saveDraft(user?.id, emotion, text);
     }
-  }, [emotion, text]);
+  }, [emotion, text, user?.id]);
 
   async function loadDiaryEntries() {
     if (!supabase || !user) return;
@@ -255,6 +287,7 @@ export default function DiaryPage() {
     const { data, error } = await supabase
       .from("diary_entries")
       .select("*")
+      .order("entry_date", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(100);
 
@@ -270,7 +303,6 @@ export default function DiaryPage() {
 
   async function submitDiary(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!text.trim()) return;
 
     if (!isConfigured || !supabase) {
       setStatus({ tone: "error", text: "Supabase 환경변수가 아직 설정되지 않아 기록을 저장할 수 없습니다." });
@@ -278,7 +310,7 @@ export default function DiaryPage() {
     }
 
     if (!user) {
-      saveDraft(emotion, text);
+      saveDraft(null, emotion, text);
       setStatus({
         tone: "neutral",
         text: "기록을 안전하게 저장하려면 로그인이 필요해요. 로그인하면 휴대전화와 PC에서 같은 기록을 이어서 볼 수 있습니다."
@@ -286,6 +318,11 @@ export default function DiaryPage() {
       return;
     }
 
+    const content = text.trim();
+    const requestKey = `${user.id}:${emotion}:${content}:${getKoreaDateString()}`;
+    if (pendingSaveKeyRef.current === requestKey) return;
+
+    pendingSaveKeyRef.current = requestKey;
     setIsSaving(true);
     setStatus(null);
 
@@ -296,7 +333,7 @@ export default function DiaryPage() {
         user_id: user.id,
         emotion_code: emotion,
         emotion_label: getEmotionLabel(emotion),
-        content: text.trim(),
+        content,
         ai_comment: aiComment,
         entry_date: getKoreaDateString()
       })
@@ -306,22 +343,25 @@ export default function DiaryPage() {
     if (error || !data) {
       setStatus({ tone: "error", text: "저장하지 못했어요. 잠시 후 다시 시도해주세요." });
       setIsSaving(false);
+      pendingSaveKeyRef.current = null;
       return;
     }
 
     setEntries((items) => [data, ...items]);
     setText("");
-    clearDraft();
+    clearDraft(user.id);
     setStatus({ tone: "success", text: "저장 완료. 이 기록은 로그인한 계정에 안전하게 저장되었습니다." });
     setIsSaving(false);
+    pendingSaveKeyRef.current = null;
   }
 
   async function updateEntry(entry: DiaryEntry) {
-    if (!supabase || !user || !editingText.trim()) return;
+    if (!supabase || !user || editingSaveId) return;
 
     const nextEmotion = editingEmotion || entry.emotion_code;
     const nextEmotionLabel = emotionOptions.find((option) => option.id === nextEmotion)?.label || entry.emotion_label;
     const nextComment = createDiaryComment(nextEmotion, editingText);
+    setEditingSaveId(entry.id);
     const { data, error } = await supabase
       .from("diary_entries")
       .update({
@@ -336,6 +376,7 @@ export default function DiaryPage() {
 
     if (error || !data) {
       setStatus({ tone: "error", text: "기록을 수정하지 못했어요. 다시 시도해주세요." });
+      setEditingSaveId(null);
       return;
     }
 
@@ -343,23 +384,28 @@ export default function DiaryPage() {
     setEditingId(null);
     setEditingText("");
     setEditingEmotion(null);
+    setEditingSaveId(null);
     setStatus({ tone: "success", text: "기록을 수정했습니다." });
   }
 
-  async function deleteEntry(id: string) {
+  async function deleteEntry(entry: DiaryEntry) {
     if (!supabase || !user) return;
 
+    setDeletingId(entry.id);
     const previousEntries = entries;
-    setEntries((items) => items.filter((entry) => entry.id !== id));
+    setEntries((items) => items.filter((item) => item.id !== entry.id));
 
-    const { error } = await supabase.from("diary_entries").delete().eq("id", id);
+    const { error } = await supabase.from("diary_entries").delete().eq("id", entry.id);
 
     if (error) {
       setEntries(previousEntries);
       setStatus({ tone: "error", text: "기록을 삭제하지 못했어요. 다시 시도해주세요." });
+      setDeletingId(null);
       return;
     }
 
+    setEntryPendingDelete(null);
+    setDeletingId(null);
     setStatus({ tone: "success", text: "기록을 삭제했습니다." });
   }
 
@@ -445,7 +491,11 @@ export default function DiaryPage() {
           </div>
         </section>
 
-        {status ? <p className={`diary-status is-${status.tone}`}>{status.text}</p> : null}
+        {status ? (
+          <p aria-live="polite" className={`diary-status is-${status.tone}`}>
+            {status.text}
+          </p>
+        ) : null}
 
         {!isAuthLoading && !user ? (
           <aside className="diary-login-panel">
@@ -490,6 +540,7 @@ export default function DiaryPage() {
 
             <fieldset className="diary-emotion-field">
               <legend>오늘의 감정상태</legend>
+              <p className="diary-field-hint">지금 가장 가까운 감정을 하나만 골라주세요. 본문 없이 감정만 남겨도 괜찮아요.</p>
               <div className="diary-emotion-grid">
                 {emotionOptions.map((option) => {
                   const isSelected = emotion === option.id;
@@ -499,7 +550,10 @@ export default function DiaryPage() {
                       aria-pressed={isSelected}
                       className="diary-emotion-button"
                       key={option.id}
-                      onClick={() => setEmotion(option.id)}
+                      onClick={() => {
+                        setEmotion(option.id);
+                        setStatus(null);
+                      }}
                       type="button"
                     >
                       <span className="diary-emotion-head">
@@ -519,12 +573,18 @@ export default function DiaryPage() {
             </fieldset>
 
             <label className="diary-text-field" htmlFor="diary-text">
-              <span>감정일기</span>
+              <span className="diary-label-row">
+                <span>감정일기</span>
+                <span aria-live="polite">{text.length}/{DIARY_CONTENT_MAX_LENGTH}</span>
+              </span>
               <textarea
                 id="diary-text"
-                maxLength={800}
-                onChange={(event) => setText(event.target.value)}
-                placeholder="오늘 마음에 남은 장면, 감정, 생각을 자유롭게 적어보세요."
+                maxLength={DIARY_CONTENT_MAX_LENGTH}
+                onChange={(event) => {
+                  setText(event.target.value);
+                  setStatus(null);
+                }}
+                placeholder={"오늘 어떤 일이 있었나요?\n짧게 한 줄만 남겨도 괜찮아요."}
                 rows={9}
                 value={text}
               />
@@ -535,9 +595,14 @@ export default function DiaryPage() {
               <p>{DIARY_PREVIEW_MESSAGE}</p>
             </aside>
 
-            <button className="primary-button diary-submit" disabled={!text.trim() || isSaving} type="submit">
+            <button
+              aria-label={`${currentEmotionLabel} 감정일기 저장`}
+              className="primary-button diary-submit"
+              disabled={!canSaveDiary}
+              type="submit"
+            >
               <PenLine size={17} aria-hidden="true" />
-              {isSaving ? "저장 중..." : "감정일기 저장"}
+              {isSaving ? "기록을 저장하고 있어요..." : text.trim() ? "감정일기 저장" : "감정만 저장"}
             </button>
           </form>
 
@@ -553,7 +618,7 @@ export default function DiaryPage() {
               <div className="diary-latest-card">
                 <span className="diary-date">
                   <CalendarDays size={15} aria-hidden="true" />
-                  {formatDate(latestEntry.created_at)}
+                  {formatEntryDate(latestEntry)}
                 </span>
                 <strong>{latestEntry.emotion_label}</strong>
                 <p>{latestEntry.ai_comment}</p>
@@ -582,7 +647,7 @@ export default function DiaryPage() {
               {entries.map((entry) => (
                 <article className="diary-entry-card" key={entry.id}>
                   <div>
-                    <span>{formatDate(entry.created_at)}</span>
+                    <span>{formatEntryDate(entry)}</span>
                     <strong>{entry.emotion_label}</strong>
                   </div>
 
@@ -604,15 +669,20 @@ export default function DiaryPage() {
                       </label>
                       <textarea
                         aria-label="감정일기 수정"
-                        maxLength={800}
+                        maxLength={DIARY_CONTENT_MAX_LENGTH}
                         onChange={(event) => setEditingText(event.target.value)}
                         rows={5}
                         value={editingText}
                       />
                       <div>
-                        <button className="secondary-button" onClick={() => updateEntry(entry)} type="button">
+                        <button
+                          className="secondary-button"
+                          disabled={editingSaveId === entry.id}
+                          onClick={() => updateEntry(entry)}
+                          type="button"
+                        >
                           <Check size={15} aria-hidden="true" />
-                          저장
+                          {editingSaveId === entry.id ? "저장 중..." : "수정 내용 저장"}
                         </button>
                         <button
                           className="secondary-button"
@@ -630,7 +700,9 @@ export default function DiaryPage() {
                     </div>
                   ) : (
                     <>
-                      <p>{entry.content}</p>
+                      <p className={entry.content ? undefined : "diary-entry-muted"}>
+                        {entry.content || "감정만 남긴 기록입니다."}
+                      </p>
                       <blockquote>{entry.ai_comment}</blockquote>
                       <div className="diary-entry-actions">
                         <button
@@ -648,7 +720,8 @@ export default function DiaryPage() {
                         <button
                           aria-label="기록 삭제"
                           className="diary-delete-button"
-                          onClick={() => deleteEntry(entry.id)}
+                          disabled={deletingId === entry.id}
+                          onClick={() => setEntryPendingDelete(entry)}
                           type="button"
                         >
                           <Trash2 size={15} aria-hidden="true" />
@@ -665,6 +738,44 @@ export default function DiaryPage() {
         <p className="notice">
           {disclaimer} 로그인한 사용자의 감정일기는 Supabase에 계정별로 저장되며, 비로그인 작성 내용은 임시 draft로만 보존됩니다.
         </p>
+
+        {entryPendingDelete ? (
+          <div className="diary-delete-modal-backdrop" role="presentation">
+            <div
+              aria-describedby="diary-delete-description"
+              aria-labelledby="diary-delete-title"
+              aria-modal="true"
+              className="diary-delete-modal"
+              role="dialog"
+            >
+              <div>
+                <span className="diary-delete-kicker">{formatEntryDate(entryPendingDelete)}</span>
+                <h2 id="diary-delete-title">이 기록을 삭제할까요?</h2>
+                <p id="diary-delete-description">
+                  {entryPendingDelete.emotion_label} 기록은 삭제 후 복구할 수 없습니다.
+                </p>
+              </div>
+              <div className="diary-delete-actions">
+                <button
+                  className="secondary-button"
+                  disabled={deletingId === entryPendingDelete.id}
+                  onClick={() => setEntryPendingDelete(null)}
+                  type="button"
+                >
+                  취소
+                </button>
+                <button
+                  className="secondary-button diary-danger-button"
+                  disabled={deletingId === entryPendingDelete.id}
+                  onClick={() => deleteEntry(entryPendingDelete)}
+                  type="button"
+                >
+                  {deletingId === entryPendingDelete.id ? "삭제 중..." : "기록 삭제"}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </main>
     </>
   );

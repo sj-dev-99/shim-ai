@@ -616,6 +616,10 @@ input {
 .shim-service-card {
   --accent: var(--teal);
   --accent-soft: var(--selected-panel);
+  --card-scale: 0.86;
+  --card-opacity: 0.72;
+  --card-y: 22px;
+  --card-shadow: 0 10px 16px rgba(78, 67, 52, 0.04);
   position: relative;
   display: grid;
   flex: 0 0 var(--service-card-width);
@@ -630,18 +634,16 @@ input {
   background: linear-gradient(180deg, rgba(255, 253, 247, 0.92), rgba(255, 252, 244, 0.74));
   color: var(--ink);
   text-align: left;
-  transform: scale(0.94);
-  opacity: 0.8;
+  transform: translate3d(0, var(--card-y), 0) scale(var(--card-scale));
+  opacity: var(--card-opacity);
+  box-shadow: var(--card-shadow);
   backface-visibility: hidden;
   transform-origin: center center;
-  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+  transition: border-color 180ms ease;
 }
 
 .shim-service-card.is-active {
   border-color: var(--accent);
-  box-shadow: 0 20px 46px rgba(78, 67, 52, 0.12);
-  opacity: 1;
-  transform: scale(1);
 }
 
 .shim-service-card.accent-teal {
@@ -1062,11 +1064,12 @@ input {
   }
 
   .shim-service-card {
-    transform: none;
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
   }
 
   .shim-service-card.is-active {
-    transform: none;
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 

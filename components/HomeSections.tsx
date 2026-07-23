@@ -19,6 +19,14 @@ const VELOCITY_WINDOW_MS = 110;
 const MAX_RELEASE_VELOCITY = 1.15;
 const VELOCITY_PROJECT_MS = 90;
 const MAX_SLIDES_PER_GESTURE = 2;
+const ACTIVE_CARD_SCALE = 1;
+const ADJACENT_CARD_SCALE = 0.91;
+const DISTANT_CARD_SCALE = 0.86;
+const ACTIVE_CARD_OPACITY = 1;
+const ADJACENT_CARD_OPACITY = 0.9;
+const DISTANT_CARD_OPACITY = 0.72;
+const ADJACENT_CARD_Y = 12;
+const DISTANT_CARD_Y = 22;
 
 const serviceIcons: Record<HomeService["id"], typeof ClipboardCheck> = {
   test: ClipboardCheck,
@@ -93,11 +101,13 @@ function ServiceCard({
   return (
     <button
       aria-label={`${service.title} 서비스 보기`}
+      aria-current={isActive ? "true" : undefined}
       aria-selected={isActive}
       className={`shim-service-card accent-${service.accent} ${isActive ? "is-active" : ""}`}
       onClick={() => onSelect(index)}
       ref={setCardRef}
       role="tab"
+      tabIndex={isActive ? 0 : -1}
       type="button"
     >
       <span className="shim-card-code">{service.code}</span>
@@ -185,7 +195,9 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     cardWidth: 0,
     gap: 4,
     viewportWidth: 0,
-    step: 0
+    trackOffsetLeft: 0,
+    step: 0,
+    offsets: [] as number[]
   });
   const dragStateRef = useRef({
     isDragging: false,
@@ -214,9 +226,15 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
 
   useEffect(() => {
     let frame = 0;
+    let attempts = 0;
 
     function setupCarousel() {
-      measureCarousel();
+      const didMeasure = measureCarousel();
+      if (!didMeasure && attempts < 8) {
+        attempts += 1;
+        frame = window.requestAnimationFrame(setupCarousel);
+        return;
+      }
       setTrackX(getTranslateForIndex(loopOffset));
       setIsCarouselReady(true);
     }
@@ -241,18 +259,22 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     const viewport = carouselRef.current;
     const track = trackRef.current;
     const card = cardRefs.current[activeVirtualIndexRef.current] || cardRefs.current[loopOffset];
-    if (!viewport || !track || !card) return;
+    if (!viewport || !track || !card) return false;
 
     const trackStyles = window.getComputedStyle(track);
     const gap = Number.parseFloat(trackStyles.columnGap || trackStyles.gap || "4") || 4;
-    const cardWidth = card.getBoundingClientRect().width;
+    const cardWidth = card.offsetWidth || card.getBoundingClientRect().width;
     const viewportWidth = viewport.getBoundingClientRect().width;
+    const offsets = cardRefs.current.map((cardNode, index) => cardNode?.offsetLeft ?? index * (cardWidth + gap));
     metricsRef.current = {
       cardWidth,
       gap,
       viewportWidth,
-      step: cardWidth + gap
+      trackOffsetLeft: track.offsetLeft || 0,
+      step: cardWidth + gap,
+      offsets
     };
+    return true;
   }
 
   function handleResize() {
@@ -261,9 +283,10 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   }
 
   function getTranslateForIndex(index: number) {
-    const { cardWidth, viewportWidth, step } = metricsRef.current;
+    const { cardWidth, offsets, step, trackOffsetLeft, viewportWidth } = metricsRef.current;
     if (!cardWidth || !viewportWidth || !step) return 0;
-    return (viewportWidth - cardWidth) / 2 - index * step;
+    const cardOffset = offsets[index] ?? index * step;
+    return (viewportWidth - cardWidth) / 2 - trackOffsetLeft - cardOffset;
   }
 
   function setTrackX(value: number) {
@@ -271,6 +294,43 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     if (trackRef.current) {
       trackRef.current.style.transform = `translate3d(${value}px, 0, 0)`;
     }
+    updateCardVisuals(value);
+  }
+
+  function interpolateByDistance(distance: number, activeValue: number, adjacentValue: number, distantValue: number) {
+    const clamped = Math.min(2, Math.max(0, distance));
+    if (clamped <= 1) {
+      return activeValue + (adjacentValue - activeValue) * clamped;
+    }
+    return adjacentValue + (distantValue - adjacentValue) * (clamped - 1);
+  }
+
+  function updateCardVisuals(trackX: number) {
+    const { cardWidth, offsets, step, trackOffsetLeft, viewportWidth } = metricsRef.current;
+    if (!cardWidth || !viewportWidth || !step) return;
+
+    const viewportCenter = viewportWidth / 2;
+
+    cardRefs.current.forEach((card, index) => {
+      if (!card) return;
+
+      const cardOffset = offsets[index] ?? index * step;
+      const cardCenter = trackOffsetLeft + trackX + cardOffset + cardWidth / 2;
+      const distance = Math.abs(cardCenter - viewportCenter) / step;
+      const scale = interpolateByDistance(distance, ACTIVE_CARD_SCALE, ADJACENT_CARD_SCALE, DISTANT_CARD_SCALE);
+      const opacity = interpolateByDistance(distance, ACTIVE_CARD_OPACITY, ADJACENT_CARD_OPACITY, DISTANT_CARD_OPACITY);
+      const translateY = interpolateByDistance(distance, 0, ADJACENT_CARD_Y, DISTANT_CARD_Y);
+      const depth = Math.max(0, 1 - Math.min(distance, 2) / 2);
+      const shadowAlpha = 0.04 + depth * 0.1;
+      const shadowBlur = 16 + depth * 30;
+      const shadowY = 10 + depth * 12;
+
+      card.style.setProperty("--card-scale", scale.toFixed(4));
+      card.style.setProperty("--card-opacity", opacity.toFixed(4));
+      card.style.setProperty("--card-y", `${translateY.toFixed(2)}px`);
+      card.style.setProperty("--card-shadow", `0 ${shadowY.toFixed(1)}px ${shadowBlur.toFixed(1)}px rgba(78, 67, 52, ${shadowAlpha.toFixed(3)})`);
+      card.style.zIndex = String(Math.round(1000 - distance * 100));
+    });
   }
 
   function cancelAnimation() {
@@ -293,8 +353,6 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
     const nextRealIndex = normalizeIndex(nextIndex);
     activeVirtualIndexRef.current = nextIndex;
     activeIndexRef.current = nextRealIndex;
-    setActiveVirtualIndex(nextIndex);
-    setActiveIndex(nextRealIndex);
 
     if (shouldAnimate) {
       animateToVirtualIndex(nextIndex);
@@ -393,10 +451,13 @@ export function ServiceCarousel({ recommendedCount }: ServiceCarouselProps) {
   function normalizeLoopPosition(virtualIndex: number) {
     const realIndex = normalizeIndex(virtualIndex);
     const centeredIndex = loopOffset + realIndex;
+    activeVirtualIndexRef.current = centeredIndex;
+    activeIndexRef.current = realIndex;
+    setActiveVirtualIndex(centeredIndex);
+    setActiveIndex(realIndex);
+
     if (centeredIndex === virtualIndex) return;
 
-    activeVirtualIndexRef.current = centeredIndex;
-    setActiveVirtualIndex(centeredIndex);
     setTrackX(getTranslateForIndex(centeredIndex));
   }
 
